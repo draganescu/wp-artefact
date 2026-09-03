@@ -1,0 +1,87 @@
+/* Artifacts edit screen. */
+
+.wp-artifacts-code {
+	width: 100%;
+	min-height: 320px;
+	font-family: Menlo, Consolas, monaco, monospace;
+	font-size: 12px;
+	line-height: 1.5;
+	tab-size: 2;
+	white-space: pre;
+	overflow: auto;
+	background: #1d2327;
+	color: #e6e6e6;
+	border-radius: 4px;
+	border: 1px solid #2c3338;
+	padding: 12px;
+}
+
+.wp-artifacts-files {
+	margin-top: 12px;
+}
+
+.wp-artifacts-files code {
+	background: none;
+	padding: 0;
+}
+
+.wp-artifacts-bundle-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-top: 16px;
+}
+
+.wp-artifacts-replace {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.wp-artifacts-preview__bar {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 8px;
+	flex-wrap: wrap;
+}
+
+.wp-artifacts-preview__frame {
+	display: block;
+	width: 100%;
+	height: 600px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+	margin: 0 auto;
+	transition: width 150ms ease;
+}
+
+.wp-artifacts-preview.is-mobile .wp-artifacts-preview__frame {
+	width: 390px;
+	max-width: 100%;
+	height: 700px;
+}
+
+.wp-artifacts-provenance {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.wp-artifacts-provenance th {
+	text-align: left;
+	padding: 2px 8px 2px 0;
+	font-weight: 600;
+	white-space: nowrap;
+	vertical-align: top;
+}
+
+.wp-artifacts-provenance td {
+	padding: 2px 0;
+	word-break: break-word;
+}
+
+.wp-artifacts-copyable {
+	margin-bottom: 6px;
+}

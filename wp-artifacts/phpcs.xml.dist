@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<ruleset name="wp-artifacts">
+	<description>WordPress-Extra plus WordPress-Docs for the Artifacts plugin.</description>
+
+	<file>.</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/tests/e2e/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg name="parallel" value="8"/>
+	<arg value="ps"/>
+
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress-Docs"/>
+
+	<config name="minimum_wp_version" value="6.9"/>
+	<config name="testVersion" value="8.1-"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="wp-artifacts"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="wp_artifacts"/>
+				<element value="WPArtifacts"/>
+				<element value="WP_ARTIFACTS"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- The whole point of this plugin is to store and echo bytes verbatim. -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>src/Serving/Responder.php</exclude-pattern>
+	</rule>
+
+	<!--
+		The artifact capabilities are custom; Security\Capabilities::grant() adds them
+		to the roles on activation, which this sniff cannot see.
+	-->
+	<rule ref="WordPress.WP.Capabilities.Unknown">
+		<severity>0</severity>
+	</rule>
+
+	<!--
+		Bundle files travel as base64 in JSON, because that is what the abilities and the
+		MCP transport carry. This is a wire format, not obfuscation.
+	-->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode">
+		<severity>0</severity>
+	</rule>
+
+	<!--
+		Bundle assets are written and streamed directly. WP_Filesystem cannot stream a
+		response body, and asking for filesystem credentials on a front-end request is
+		not an option.
+	-->
+	<rule ref="WordPress.WP.AlternativeFunctions">
+		<exclude-pattern>src/Storage/BundleStore.php</exclude-pattern>
+		<exclude-pattern>src/Serving/Responder.php</exclude-pattern>
+		<exclude-pattern>src/Abilities/UploadUrl.php</exclude-pattern>
+		<exclude-pattern>src/Admin/EditScreen.php</exclude-pattern>
+		<exclude-pattern>src/Cli/Commands.php</exclude-pattern>
+		<exclude-pattern>uninstall.php</exclude-pattern>
+		<!-- Tests read the files the bundle store just wrote, straight off disk. -->
+		<exclude-pattern>tests/phpunit/*</exclude-pattern>
+	</rule>
+
+	<!-- The optional headless screenshot provider shells out to a Chromium binary. -->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.system_calls_shell_exec">
+		<exclude-pattern>src/Abilities/Screenshot.php</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName">
+		<properties>
+			<property name="strict_class_file_names" value="false"/>
+		</properties>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+	</rule>
+</ruleset>

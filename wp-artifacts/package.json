@@ -1,0 +1,17 @@
+{
+	"name": "wp-artifacts",
+	"private": true,
+	"version": "1.0.0",
+	"description": "Artifacts for WordPress",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"start": "wp-playground server --port=9400 --mount-before-install=.:/wordpress/wp-content/plugins/wp-artifacts --blueprint=blueprint.json",
+		"test:e2e:server": "wp-playground server --port=9411 --mount-before-install=.:/wordpress/wp-content/plugins/wp-artifacts --blueprint=tests/e2e/blueprint.json",
+		"test:e2e": "playwright test",
+		"test:php": "phpunit"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.49.0",
+		"@wp-playground/cli": "^1.0.0"
+	}
+}

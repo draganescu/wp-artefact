@@ -1,0 +1,1331 @@
+# Copyright (C) 2026 Andrei Draganescu
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Artifacts 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-artifacts\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-03T17:53:58+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.8.1\n"
+"X-Domain: wp-artifacts\n"
+
+#. Plugin Name of the plugin
+#: src/Abilities/Registrar.php:100
+#: src/Abilities/Registrar.php:221
+#: src/Admin/SettingsPage.php:62
+#: src/Admin/SettingsPage.php:63
+#: src/Admin/SettingsPage.php:131
+#: src/Admin/SiteHealth.php:325
+#: src/PostType/ArtifactPostType.php:554
+msgid "Artifacts"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://github.com/draganescu/wp-artifacts"
+msgstr ""
+
+#. Description of the plugin
+msgid "Agent-authored HTML/CSS/JS artifacts as a first-class WordPress content type: stored like a post, served byte-identical, exposed as Abilities for MCP, REST and WP-CLI."
+msgstr ""
+
+#. Author of the plugin
+msgid "Andrei Draganescu"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://andreidraganescu.info"
+msgstr ""
+
+#: src/Abilities/Delete.php:29
+#: src/Abilities/Delete.php:67
+msgid "Delete an artifact"
+msgstr ""
+
+#: src/Abilities/Delete.php:30
+msgid "Move an artifact to the trash, or delete it for good with force=true. A deleted URL answers 410, or 301 when redirect_to is given."
+msgstr ""
+
+#: src/Abilities/Delete.php:38
+#: src/Abilities/Revisions.php:38
+#: src/Abilities/Rollback.php:37
+#: src/Abilities/Screenshot.php:44
+#: src/Abilities/SetFrontPage.php:37
+#: src/Abilities/Share.php:37
+#: src/Abilities/Update.php:31
+msgid "Artifact ID."
+msgstr ""
+
+#: src/Abilities/Delete.php:42
+msgid "Skip the trash and delete permanently, including every stored asset. Default false."
+msgstr ""
+
+#: src/Abilities/Delete.php:46
+msgid "URL the old artifact URL should redirect to."
+msgstr ""
+
+#: src/Abilities/Delete.php:88
+msgid "The current user cannot delete artifacts."
+msgstr ""
+
+#: src/Abilities/Get.php:28
+#: src/Abilities/Get.php:64
+msgid "Get an artifact"
+msgstr ""
+
+#: src/Abilities/Get.php:29
+msgid "Read one artifact by ID or slug, optionally including its entry document and its file manifest."
+msgstr ""
+
+#: src/Abilities/Get.php:36
+msgid "Artifact ID. Either this or \"slug\" is required."
+msgstr ""
+
+#: src/Abilities/Get.php:40
+msgid "Artifact slug. Either this or \"id\" is required."
+msgstr ""
+
+#: src/Abilities/Get.php:44
+msgid "Include the entry document and its sha256. Default true."
+msgstr ""
+
+#: src/Abilities/Get.php:48
+msgid "Include the file manifest. Default true."
+msgstr ""
+
+#: src/Abilities/Guide.php:28
+#: src/Abilities/Guide.php:55
+msgid "How to build an artifact for this site"
+msgstr ""
+
+#: src/Abilities/Guide.php:29
+msgid "Read this before publishing: how artifacts are served on this site, the size and MIME limits, how to reference bundle files, and how to preview work before it goes live."
+msgstr ""
+
+#: src/Abilities/ListArtifacts.php:30
+#: src/Abilities/ListArtifacts.php:87
+msgid "List artifacts"
+msgstr ""
+
+#: src/Abilities/ListArtifacts.php:31
+msgid "List artifacts on this site, newest first, with their URLs, sizes and provenance."
+msgstr ""
+
+#: src/Abilities/ListArtifacts.php:40
+msgid "Filter by status. Default \"any\" for editors, \"publish\" otherwise."
+msgstr ""
+
+#: src/Abilities/ListArtifacts.php:44
+msgid "Only artifacts attached to this post or page."
+msgstr ""
+
+#: src/Abilities/ListArtifacts.php:48
+msgid "Free text search over title and content."
+msgstr ""
+
+#: src/Abilities/ListArtifacts.php:53
+msgid "Page number, 1 based."
+msgstr ""
+
+#: src/Abilities/ListArtifacts.php:59
+msgid "Results per page, up to 100. Default 20."
+msgstr ""
+
+#: src/Abilities/Publish.php:28
+#: src/Abilities/Publish.php:45
+msgid "Publish an artifact"
+msgstr ""
+
+#: src/Abilities/Publish.php:29
+msgid "Store a self-contained document (usually a complete HTML page) as a new artifact and get back its URL. The bytes you send are the bytes visitors receive: no theme, no scripts injected, nothing filtered. Call wp-artifacts/site-style first if the artifact should match the site design."
+msgstr ""
+
+#: src/Abilities/Registrar.php:101
+msgid "Publish and manage self-contained documents served byte-identical."
+msgstr ""
+
+#: src/Abilities/Registrar.php:222
+msgid "Publish and manage self-contained HTML artifacts on this WordPress site."
+msgstr ""
+
+#: src/Abilities/Registrar.php:269
+msgid "Artifacts: this site has no Abilities API, so the MCP and agent tools are unavailable. Artifacts themselves still work. The Abilities API ships with WordPress 6.9."
+msgstr ""
+
+#: src/Abilities/Registrar.php:287
+msgid "Human readable title. Shown in the admin and in the archive, never injected into the artifact."
+msgstr ""
+
+#: src/Abilities/Registrar.php:291
+msgid "The entry document, stored and served byte for byte. Usually a complete HTML document."
+msgstr ""
+
+#: src/Abilities/Registrar.php:295
+msgid "MIME type of the entry document. Defaults to text/html; charset=utf-8."
+msgstr ""
+
+#: src/Abilities/Registrar.php:299
+msgid "Relative path the entry document is known by inside the bundle. Defaults to index.html."
+msgstr ""
+
+#: src/Abilities/Registrar.php:303
+msgid "Bundle assets, addressed by relative path from the entry document. Sending this replaces the whole asset set."
+msgstr ""
+
+#: src/Abilities/Registrar.php:311
+msgid "Relative path such as css/app.css. No leading slash, no \"..\"."
+msgstr ""
+
+#: src/Abilities/Registrar.php:315
+msgid "MIME type. Guessed from the extension when omitted."
+msgstr ""
+
+#: src/Abilities/Registrar.php:319
+msgid "File contents, base64 encoded."
+msgstr ""
+
+#: src/Abilities/Registrar.php:327
+msgid "Use \"private\" plus the returned share_url to show work in progress without publishing it."
+msgstr ""
+
+#: src/Abilities/Registrar.php:331
+msgid "URL slug. WordPress makes it unique if it is taken."
+msgstr ""
+
+#: src/Abilities/Registrar.php:335
+msgid "Short description used in the archive."
+msgstr ""
+
+#: src/Abilities/Registrar.php:339
+msgid "ID of a post or page this artifact represents."
+msgstr ""
+
+#: src/Abilities/Registrar.php:343
+msgid "Serve this artifact at the parent post URL."
+msgstr ""
+
+#: src/Abilities/Registrar.php:347
+msgid "Allow search engines to index the artifact. Default false."
+msgstr ""
+
+#: src/Abilities/Registrar.php:351
+msgid "Content-Security-Policy: \"inherit\", \"strict\", \"off\", or a literal header value."
+msgstr ""
+
+#: src/Abilities/Registrar.php:355
+msgid "Serve the artifact inside the site header and footer. Best effort."
+msgstr ""
+
+#: src/Abilities/Registrar.php:359
+msgid "Free-form record of what made this artifact."
+msgstr ""
+
+#: src/Abilities/Registrar.php:408
+msgid "The current user cannot publish artifacts. The publish_artifacts capability is required."
+msgstr ""
+
+#: src/Abilities/Registrar.php:425
+msgid "The current user cannot read this site."
+msgstr ""
+
+#: src/Abilities/Registrar.php:448
+msgid "Pass either \"id\" or \"slug\"."
+msgstr ""
+
+#. translators: %d: artifact ID.
+#: src/Abilities/Registrar.php:470
+msgid "Artifact %d is not public and the current user cannot read it. The read_private_artifacts capability is required."
+msgstr ""
+
+#. translators: %d: artifact ID.
+#: src/Abilities/Registrar.php:495
+msgid "The current user cannot modify artifact %d."
+msgstr ""
+
+#: src/Abilities/Revisions.php:29
+#: src/Abilities/Revisions.php:70
+msgid "List artifact revisions"
+msgstr ""
+
+#: src/Abilities/Revisions.php:30
+msgid "List the stored revisions of an artifact, newest first. Pass a revision_id to wp-artifacts/rollback to restore one."
+msgstr ""
+
+#: src/Abilities/Rollback.php:28
+#: src/Abilities/Rollback.php:54
+msgid "Roll an artifact back"
+msgstr ""
+
+#: src/Abilities/Rollback.php:29
+msgid "Restore a previous revision of an artifact. The content and the file manifest both go back; the assets of that revision are still on disk."
+msgstr ""
+
+#: src/Abilities/Rollback.php:41
+msgid "Revision to restore, from wp-artifacts/revisions."
+msgstr ""
+
+#: src/Abilities/Screenshot.php:35
+#: src/Abilities/Screenshot.php:74
+msgid "Screenshot an artifact"
+msgstr ""
+
+#: src/Abilities/Screenshot.php:36
+msgid "Render an artifact to a PNG using the screenshot provider configured on this site, and use it as the artifact thumbnail when there is none. Returns screenshot_provider_unavailable when no provider is configured."
+msgstr ""
+
+#: src/Abilities/Screenshot.php:49
+msgid "Viewport to render at. Default desktop."
+msgstr ""
+
+#: src/Abilities/Screenshot.php:106
+msgid "Set a screenshot provider under Settings → Artifacts, or set the featured image by hand."
+msgstr ""
+
+#. translators: %s: artifact title.
+#: src/Abilities/Screenshot.php:270
+msgid "Screenshot of %s"
+msgstr ""
+
+#: src/Abilities/SetFrontPage.php:28
+#: src/Abilities/SetFrontPage.php:63
+msgid "Set an artifact as the front page"
+msgstr ""
+
+#: src/Abilities/SetFrontPage.php:29
+msgid "Serve an artifact at the site root. This changes a site-wide setting, so it needs the manage_options capability. Pass restore=true to put the previous front page back."
+msgstr ""
+
+#: src/Abilities/SetFrontPage.php:41
+msgid "Undo: restore the front page setting this ability replaced."
+msgstr ""
+
+#: src/Abilities/SetFrontPage.php:87
+msgid "Setting the front page changes a site-wide setting and needs the manage_options capability."
+msgstr ""
+
+#: src/Abilities/SetFrontPage.php:123
+msgid "Only a published artifact can be the front page. Publish it first."
+msgstr ""
+
+#: src/Abilities/Share.php:28
+#: src/Abilities/Share.php:61
+msgid "Get an artifact share link"
+msgstr ""
+
+#: src/Abilities/Share.php:29
+msgid "Get the unlisted preview URL of an artifact, which shows drafts and private artifacts to anyone holding the link. Pass regenerate=true to invalidate the old link."
+msgstr ""
+
+#: src/Abilities/Share.php:41
+msgid "Mint a new token, invalidating every previously shared link. Default false."
+msgstr ""
+
+#: src/Abilities/SiteStyle.php:28
+#: src/Abilities/SiteStyle.php:50
+msgid "Describe the site style"
+msgstr ""
+
+#: src/Abilities/SiteStyle.php:29
+msgid "Return the palette, fonts, spacing scale, logo, rendered header and footer, and the CSS custom properties of this site, plus prose guidance. Call this before writing an artifact so it looks like it belongs here."
+msgstr ""
+
+#: src/Abilities/SiteStyle.php:37
+msgid "Bypass the cache and re-read the theme. Default false."
+msgstr ""
+
+#: src/Abilities/SiteStyleResource.php:27
+#: src/Abilities/SiteStyleResource.php:46
+msgid "Site style"
+msgstr ""
+
+#: src/Abilities/SiteStyleResource.php:28
+msgid "Palette, fonts, spacing, logo and site chrome of this WordPress site, as JSON."
+msgstr ""
+
+#: src/Abilities/Update.php:38
+#: src/Abilities/Update.php:55
+msgid "Update an artifact"
+msgstr ""
+
+#: src/Abilities/Update.php:39
+msgid "Replace the content and/or the assets of an existing artifact. Every call creates a revision you can roll back to. Sending \"files\" replaces the whole asset set; omitting it keeps the current assets."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:71
+#: src/Abilities/UploadUrl.php:117
+msgid "Get a bundle upload URL"
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:72
+msgid "Mint a one-time URL that accepts a zip archive, for bundles too large to send as base64 JSON. POST the zip as the raw request body. Omit \"id\" to create a new artifact, pass it to replace an existing one."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:80
+msgid "Artifact to replace. Omit to create a new one."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:86
+msgid "Seconds the URL stays valid. Default 900."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:90
+msgid "Title for the artifact the upload creates."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:95
+msgid "Status for the artifact the upload creates. Default draft."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:165
+msgid "POST the zip archive as the raw request body with Content-Type: application/zip. The ticket works once."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:206
+msgid "That upload URL has expired or was already used. Ask for a new one with wp-artifacts/upload-url."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:217
+msgid "That upload ticket has no owner."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:257
+msgid "The request body was empty. POST the zip archive as the raw body."
+msgstr ""
+
+#. translators: 1: upload size, 2: allowed size.
+#: src/Abilities/UploadUrl.php:268
+msgid "The upload is %1$s; the limit is %2$s."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:285
+msgid "The archive has no HTML entry document. Include an index.html at the archive root."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:320
+msgid "Uploaded artifact"
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:336
+msgid "This server has no ZipArchive support, so zip uploads are unavailable. Send files as base64 with wp-artifacts/publish instead."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:345
+msgid "Could not create a temporary file for the upload."
+msgstr ""
+
+#: src/Abilities/UploadUrl.php:361
+msgid "The upload is not a readable zip archive."
+msgstr ""
+
+#. translators: %d: maximum number of files.
+#: src/Abilities/UploadUrl.php:403
+msgid "The archive has more than %d files."
+msgstr ""
+
+#: src/Admin/EditScreen.php:78
+msgid "Entry document"
+msgstr ""
+
+#: src/Admin/EditScreen.php:87
+msgid "Preview"
+msgstr ""
+
+#: src/Admin/EditScreen.php:96
+msgid "Artifact settings"
+msgstr ""
+
+#: src/Admin/EditScreen.php:105
+msgid "Provenance"
+msgstr ""
+
+#: src/Admin/EditScreen.php:123
+msgid "Convert to blocks"
+msgstr ""
+
+#: src/Admin/EditScreen.php:169
+msgid "Copied"
+msgstr ""
+
+#: src/Admin/EditScreen.php:170
+msgid "Copy"
+msgstr ""
+
+#. translators: 1: content type, 2: size, 3: sha256 prefix.
+#: src/Admin/EditScreen.php:233
+msgid "%1$s · %2$s · sha256 %3$s… — stored and served byte for byte."
+msgstr ""
+
+#: src/Admin/EditScreen.php:246
+msgid "Bundle files"
+msgstr ""
+
+#: src/Admin/EditScreen.php:248
+msgid "Path"
+msgstr ""
+
+#: src/Admin/EditScreen.php:249
+msgid "Type"
+msgstr ""
+
+#: src/Admin/EditScreen.php:250
+#: src/Admin/ListTable.php:78
+msgid "Size"
+msgstr ""
+
+#: src/Admin/EditScreen.php:275
+msgid "Download bundle (.zip)"
+msgstr ""
+
+#: src/Admin/EditScreen.php:279
+msgid "Replace bundle"
+msgstr ""
+
+#: src/Admin/EditScreen.php:284
+msgid "Uploading a .zip replaces the entry document and every asset. Uploading a single .html replaces just the entry document. Either way a revision is created first."
+msgstr ""
+
+#: src/Admin/EditScreen.php:295
+msgid "Save the artifact to preview it."
+msgstr ""
+
+#: src/Admin/EditScreen.php:304
+msgid "Desktop"
+msgstr ""
+
+#: src/Admin/EditScreen.php:305
+msgid "Mobile"
+msgstr ""
+
+#: src/Admin/EditScreen.php:306
+msgid "Reload"
+msgstr ""
+
+#: src/Admin/EditScreen.php:310
+msgid "Open in a new tab"
+msgstr ""
+
+#: src/Admin/EditScreen.php:316
+msgid "Artifact preview"
+msgstr ""
+
+#: src/Admin/EditScreen.php:336
+#: src/Admin/ListTable.php:81
+msgid "Represents"
+msgstr ""
+
+#: src/Admin/EditScreen.php:341
+msgid "— nothing —"
+msgstr ""
+
+#: src/Admin/EditScreen.php:359
+msgid "Serve this artifact at the parent URL"
+msgstr ""
+
+#: src/Admin/EditScreen.php:365
+msgid "Allow search engines to index it"
+msgstr ""
+
+#: src/Admin/EditScreen.php:371
+msgid "Wrap in the site header and footer"
+msgstr ""
+
+#: src/Admin/EditScreen.php:374
+msgid "Content Security Policy"
+msgstr ""
+
+#: src/Admin/EditScreen.php:377
+msgid "Site default"
+msgstr ""
+
+#: src/Admin/EditScreen.php:378
+#: src/Admin/SettingsPage.php:176
+msgid "Strict"
+msgstr ""
+
+#: src/Admin/EditScreen.php:379
+#: src/Admin/SettingsPage.php:177
+#: src/Admin/SettingsPage.php:238
+msgid "None"
+msgstr ""
+
+#: src/Admin/EditScreen.php:380
+msgid "Custom header…"
+msgstr ""
+
+#: src/Admin/EditScreen.php:396
+#: src/Admin/ListTable.php:199
+msgid "Share link"
+msgstr ""
+
+#: src/Admin/EditScreen.php:409
+msgid "Regenerate"
+msgstr ""
+
+#: src/Admin/EditScreen.php:413
+msgid "Anyone with the share link can view this artifact even while it is a draft or private."
+msgstr ""
+
+#: src/Admin/EditScreen.php:448
+msgid "Nothing recorded. Agents publishing through the Artifacts abilities can send tool, model, agent, source_url and generated_at."
+msgstr ""
+
+#: src/Admin/EditScreen.php:473
+msgid "Converting an artifact into a block page is not part of this version. The artifact is never modified by conversion."
+msgstr ""
+
+#: src/Admin/EditScreen.php:668
+msgid "You cannot download this artifact."
+msgstr ""
+
+#: src/Admin/EditScreen.php:679
+msgid "This server has no ZipArchive support."
+msgstr ""
+
+#: src/Admin/EditScreen.php:688
+msgid "Could not create the archive."
+msgstr ""
+
+#: src/Admin/EditScreen.php:732
+msgid "You cannot change this artifact."
+msgstr ""
+
+#: src/Admin/EditScreen.php:756
+msgid "Open the artifact"
+msgstr ""
+
+#: src/Admin/EditScreen.php:761
+#: src/Admin/EditScreen.php:762
+#: src/PostType/ArtifactPostType.php:112
+msgid "Artifact updated."
+msgstr ""
+
+#: src/Admin/EditScreen.php:763
+#: src/PostType/ArtifactPostType.php:111
+msgid "Artifact published."
+msgstr ""
+
+#: src/Admin/EditScreen.php:764
+msgid "Artifact saved."
+msgstr ""
+
+#: src/Admin/EditScreen.php:765
+msgid "Artifact submitted."
+msgstr ""
+
+#: src/Admin/EditScreen.php:766
+msgid "Artifact draft updated."
+msgstr ""
+
+#: src/Admin/ListTable.php:75
+#: src/PostType/ArtifactPostType.php:105
+msgid "Screenshot"
+msgstr ""
+
+#: src/Admin/ListTable.php:76
+msgid "Title"
+msgstr ""
+
+#: src/Admin/ListTable.php:77
+msgid "Status"
+msgstr ""
+
+#: src/Admin/ListTable.php:79
+msgid "Files"
+msgstr ""
+
+#: src/Admin/ListTable.php:80
+msgid "Made with"
+msgstr ""
+
+#: src/Admin/ListTable.php:82
+msgid "Author"
+msgstr ""
+
+#: src/Admin/ListTable.php:83
+msgid "Date"
+msgstr ""
+
+#: src/Admin/ListTable.php:129
+msgid "Password protected"
+msgstr ""
+
+#: src/Admin/ListTable.php:169
+msgid "delivering"
+msgstr ""
+
+#: src/Admin/ListTable.php:192
+msgid "Open"
+msgstr ""
+
+#: src/Admin/ListTable.php:214
+msgid "Regenerate screenshots"
+msgstr ""
+
+#. translators: %d: number of screenshots.
+#: src/Admin/ListTable.php:271
+msgid "%d screenshot regenerated."
+msgid_plural "%d screenshots regenerated."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Admin/SettingsPage.php:112
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:136
+msgid "URLs"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:141
+msgid "URL prefix"
+msgstr ""
+
+#. translators: %s: example URL.
+#: src/Admin/SettingsPage.php:145
+msgid "Artifacts live at %s. Changing this flushes the rewrite rules."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:152
+msgid "Archive slug"
+msgstr ""
+
+#. translators: %s: archive URL.
+#: src/Admin/SettingsPage.php:156
+msgid "The list of every published artifact, at %s."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:163
+msgid "Serve artifacts from a separate host"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:165
+msgid "An artifact's JavaScript runs on the origin that serves it, so on a multi-author site it can read a logged-in visitor's REST nonce. Point a second host name at this same install (for example assets.example.com) and enter it here: artifact URLs then use that host and requests on the main host are redirected. Set up the DNS and the virtual host yourself; this plugin does not touch them."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:170
+msgid "Headers"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:173
+msgid "Default Content Security Policy"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:178
+msgid "Custom header value"
+msgstr ""
+
+#. translators: %s: the strict policy value.
+#: src/Admin/SettingsPage.php:199
+msgid "Strict sends: %s. Individual artifacts can override this."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:208
+msgid "Feeds"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:209
+msgid "Include artifacts in the site feeds"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:215
+msgid "Limits"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:218
+msgid "Entry document (bytes)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:219
+msgid "Single asset (bytes)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:220
+msgid "Whole bundle (bytes)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:221
+msgid "Files per bundle"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:225
+msgid "Publishing"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:230
+msgid "Non-administrators"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:231
+msgid "Let users without unfiltered_html publish artifacts that contain no scripts"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:235
+msgid "Screenshots"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:239
+msgid "Local Chromium binary"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:240
+msgid "External service"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:252
+msgid "Path to the Chromium binary"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:258
+msgid "External service URL template"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:264
+msgid "The template must return a PNG. {url} and {url_encoded} are replaced with the artifact URL."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:270
+msgid "Uninstall"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:271
+msgid "Delete artifacts, stored bundles and settings when the plugin is deleted"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:291
+msgid "Connecting an agent"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:301
+msgid "Abilities API: available. The artifact tools are callable over REST and WP-CLI."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:302
+msgid "Abilities API: missing. It ships with WordPress 6.9; without it the agent tools are unavailable, though artifacts still work."
+msgstr ""
+
+#. translators: %s: MCP endpoint URL.
+#: src/Admin/SettingsPage.php:311
+msgid "MCP Adapter: active. Point your client at %s."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:315
+msgid "MCP Adapter: not active. Install the WordPress MCP Adapter plugin to expose these tools over MCP. Everything else keeps working without it."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:320
+msgid "Authentication is the adapter's concern: application passwords by default, or OAuth through whichever plugin you install. This plugin stores no credentials."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:65
+#: src/Admin/SiteHealth.php:93
+msgid "Artifact URLs resolve"
+msgstr ""
+
+#: src/Admin/SiteHealth.php:70
+#: src/Admin/SiteHealth.php:171
+msgid "Artifact storage is writable and not listable"
+msgstr ""
+
+#: src/Admin/SiteHealth.php:75
+#: src/Admin/SiteHealth.php:227
+msgid "Artifacts are served byte-identical"
+msgstr ""
+
+#: src/Admin/SiteHealth.php:97
+msgid "Artifacts need pretty permalinks"
+msgstr ""
+
+#: src/Admin/SiteHealth.php:98
+msgid "Permalinks are set to \"Plain\". Entry documents still answer at their query-string URL, but pretty artifact URLs and every bundle asset path need rewrite rules. Choose any other permalink structure under Settings → Permalinks."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:102
+#: src/Admin/SiteHealth.php:159
+msgid "Open the permalink settings"
+msgstr ""
+
+#: src/Admin/SiteHealth.php:119
+msgid "The artifact URL probe could not run"
+msgstr ""
+
+#. translators: %s: error message.
+#: src/Admin/SiteHealth.php:123
+msgid "A loopback request to the probe URL failed: %s. This usually means loopback requests are blocked, not that artifacts are broken."
+msgstr ""
+
+#. translators: %s: probe URL.
+#: src/Admin/SiteHealth.php:138
+msgid "%s answered with the artifact router, so interception is working."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:147
+msgid "Artifact URLs are not being intercepted"
+msgstr ""
+
+#. translators: 1: probe URL, 2: HTTP status code.
+#: src/Admin/SiteHealth.php:151
+msgid "%1$s returned %2$d without the X-Artifacts header, which means the theme answered instead of this plugin. Re-save the permalink settings to rebuild the rewrite rules."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:180
+msgid "The artifact storage directory is not writable"
+msgstr ""
+
+#. translators: %s: directory path.
+#: src/Admin/SiteHealth.php:184
+msgid "%s does not exist or cannot be written to. Bundle assets cannot be stored until that is fixed."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:204
+msgid "The artifact storage directory is browsable"
+msgstr ""
+
+#: src/Admin/SiteHealth.php:205
+msgid "The web server returns a directory listing for the artifact upload directory. Turn off directory indexes for the uploads directory."
+msgstr ""
+
+#. translators: %s: directory path.
+#: src/Admin/SiteHealth.php:213
+msgid "Assets are stored in %s, which is writable and does not list its contents."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:241
+msgid "No published artifact to test with"
+msgstr ""
+
+#: src/Admin/SiteHealth.php:242
+msgid "Publish an artifact and run this test again to confirm the bytes travel unchanged."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:263
+msgid "The serving test could not run"
+msgstr ""
+
+#. translators: %s: error message.
+#: src/Admin/SiteHealth.php:267
+msgid "A loopback request failed: %s."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:280
+msgid "the served bytes do not match the stored bytes"
+msgstr ""
+
+#: src/Admin/SiteHealth.php:284
+msgid "the response sets a cookie"
+msgstr ""
+
+#. translators: %s: artifact URL.
+#: src/Admin/SiteHealth.php:291
+msgid "%s came back byte for byte, with no cookies."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:300
+msgid "Something is rewriting artifact responses"
+msgstr ""
+
+#. translators: 1: artifact URL, 2: list of problems.
+#: src/Admin/SiteHealth.php:304
+msgid "Fetching %1$s showed that %2$s. A caching layer, a security plugin or a server module is modifying the response."
+msgstr ""
+
+#: src/Admin/SiteHealth.php:306
+msgid ", and "
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:89
+msgctxt "post type general name"
+msgid "Artifacts"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:90
+msgctxt "post type singular name"
+msgid "Artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:91
+msgid "Add Artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:92
+msgid "Add New Artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:93
+msgid "Edit Artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:94
+msgid "New Artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:95
+msgid "View Artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:96
+msgid "View Artifacts"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:97
+msgid "Search Artifacts"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:98
+msgid "No artifacts found."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:99
+msgid "No artifacts found in Trash."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:100
+msgid "All Artifacts"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:101
+msgid "Artifact Archives"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:102
+msgid "Artifact Attributes"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:103
+msgid "Insert into artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:104
+msgid "Uploaded to this artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:106
+msgid "Set screenshot"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:107
+msgid "Remove screenshot"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:108
+msgid "Use as screenshot"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:109
+msgctxt "admin menu"
+msgid "Artifacts"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:110
+msgctxt "add new on admin bar"
+msgid "Artifact"
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:113
+msgid "Artifact reverted to draft."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:118
+msgid "Self-contained documents served byte-identical."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:175
+msgid "Bundle manifest: entry document plus asset list."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:211
+msgid "MIME type of the entry document."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:226
+msgid "Whether search engines may index this artifact."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:239
+msgid "Content-Security-Policy mode: inherit, strict, off, or a literal header value."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:253
+msgid "How and by what this artifact was generated."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:291
+msgid "Serve the artifact inside the site header and footer."
+msgstr ""
+
+#: src/PostType/ArtifactPostType.php:331
+msgid "Artifact ID served in place of this post."
+msgstr ""
+
+#: src/Security/Capabilities.php:197
+msgid "a <script> tag"
+msgstr ""
+
+#: src/Security/Capabilities.php:201
+msgid "an inline event handler attribute"
+msgstr ""
+
+#: src/Security/Capabilities.php:205
+msgid "a javascript: URL"
+msgstr ""
+
+#: src/Security/Capabilities.php:209
+msgid "an iframe srcdoc document"
+msgstr ""
+
+#: src/Security/Capabilities.php:213
+msgid "an <embed> or <object> tag"
+msgstr ""
+
+#: src/Security/Capabilities.php:263
+msgid "You do not have the <code>unfiltered_html</code> capability, so you can only publish artifacts that contain no scripts. On multisite only super admins have it by default, and the <code>DISALLOW_UNFILTERED_HTML</code> constant removes it for everyone."
+msgstr ""
+
+#: src/Serving/Responder.php:180
+msgid "This artifact is password protected."
+msgstr ""
+
+#: src/Serving/Responder.php:181
+msgid "Password"
+msgstr ""
+
+#: src/Serving/Responder.php:182
+msgid "Enter"
+msgstr ""
+
+#. translators: 1: document size, 2: allowed size.
+#: src/Storage/ArtifactRepository.php:244
+msgid "The entry document is %1$s; the limit is %2$s. Move large data into bundle files."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:286
+msgid "Untitled artifact"
+msgstr ""
+
+#. translators: %d: post ID.
+#: src/Storage/ArtifactRepository.php:306
+msgid "Post %d cannot be used as an artifact parent; it must be an existing post or page."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:371
+msgid "WordPress did not create a revision for this write; revisions may be disabled by WP_POST_REVISIONS."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:448
+msgid "deliver_for_parent was ignored because the artifact has no parent post."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:454
+msgid "deliver_for_parent was ignored because you cannot edit the parent post."
+msgstr ""
+
+#. translators: 1: revision ID, 2: artifact ID.
+#: src/Storage/ArtifactRepository.php:539
+msgid "Revision %1$d does not belong to artifact %2$d."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:559
+msgid "WordPress refused to restore that revision."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:612
+msgid "WordPress refused to delete that artifact."
+msgstr ""
+
+#. translators: %s: artifact slug.
+#: src/Storage/ArtifactRepository.php:690
+msgid "No artifact with slug \"%s\" exists."
+msgstr ""
+
+#. translators: %d: artifact ID.
+#: src/Storage/ArtifactRepository.php:740
+msgid "No artifact with ID %d exists."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:912
+msgid "Every entry in \"files\" needs a \"path\" and \"data_base64\"."
+msgstr ""
+
+#. translators: %s: relative path.
+#: src/Storage/ArtifactRepository.php:931
+msgid "File \"%s\" has a data_base64 value that is not valid base64."
+msgstr ""
+
+#. translators: %s: relative path.
+#: src/Storage/ArtifactRepository.php:944
+msgid "File \"%s\" has no data_base64 value."
+msgstr ""
+
+#. translators: %s: what was detected, e.g. "a <script> tag".
+#: src/Storage/ArtifactRepository.php:978
+msgid "The entry document contains %s."
+msgstr ""
+
+#. translators: %s: relative path.
+#: src/Storage/ArtifactRepository.php:989
+msgid "File \"%s\" can execute script."
+msgstr ""
+
+#. translators: 1: relative path, 2: what was detected.
+#: src/Storage/ArtifactRepository.php:1001
+msgid "File \"%1$s\" contains %2$s."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:1011
+msgid "This site only allows administrators to publish artifacts."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:1026
+msgid "The current user lacks the unfiltered_html capability. Ask a site administrator to grant it, or publish a script-free version."
+msgstr ""
+
+#. translators: %s: MIME type.
+#: src/Storage/ArtifactRepository.php:1053
+msgid "The entry document is declared as %s but is not valid UTF-8. Re-encode it as UTF-8."
+msgstr ""
+
+#. translators: 1: requested status, 2: list of allowed statuses.
+#: src/Storage/ArtifactRepository.php:1080
+msgid "Status \"%1$s\" is not supported. Use one of: %2$s."
+msgstr ""
+
+#: src/Storage/ArtifactRepository.php:1091
+msgid "You cannot publish artifacts. Save as \"draft\" instead, or ask for the publish_artifacts capability."
+msgstr ""
+
+#. translators: %s: directory path.
+#: src/Storage/BundleStore.php:137
+msgid "Could not create the asset directory \"%s\". Check that the uploads directory is writable."
+msgstr ""
+
+#. translators: %s: directory path.
+#: src/Storage/BundleStore.php:160
+msgid "Could not create the asset directory \"%s\"."
+msgstr ""
+
+#. translators: %s: relative path.
+#: src/Storage/BundleStore.php:174
+msgid "Could not write asset \"%s\" to disk."
+msgstr ""
+
+#. translators: 1: number of files sent, 2: maximum number of files.
+#: src/Storage/Manifest.php:120
+msgid "The bundle has %1$d files; this site allows at most %2$d. Remove files or inline them into the entry document."
+msgstr ""
+
+#. translators: %s: duplicated relative path.
+#: src/Storage/Manifest.php:144
+msgid "File \"%s\" appears twice in the bundle. Each path must be unique."
+msgstr ""
+
+#. translators: 1: relative path, 2: file size, 3: allowed size.
+#: src/Storage/Manifest.php:159
+msgid "File \"%1$s\" is %2$s; the per-file limit is %3$s."
+msgstr ""
+
+#. translators: 1: bundle size, 2: allowed size.
+#: src/Storage/Manifest.php:189
+msgid "The bundle is %1$s; the limit is %2$s."
+msgstr ""
+
+#. translators: 1: relative path, 2: reason it was rejected.
+#: src/Storage/Manifest.php:236
+msgid "File path \"%1$s\" was rejected: %2$s Use forward-slash relative paths such as \"css/app.css\"."
+msgstr ""
+
+#: src/Storage/Manifest.php:245
+msgid "it is empty."
+msgstr ""
+
+#: src/Storage/Manifest.php:249
+msgid "it is longer than 255 characters."
+msgstr ""
+
+#: src/Storage/Manifest.php:253
+msgid "it contains a backslash."
+msgstr ""
+
+#: src/Storage/Manifest.php:257
+msgid "it contains a null byte."
+msgstr ""
+
+#: src/Storage/Manifest.php:261
+msgid "it contains characters outside A-Z a-z 0-9 . _ - /."
+msgstr ""
+
+#: src/Storage/Manifest.php:265
+msgid "it is absolute."
+msgstr ""
+
+#: src/Storage/Manifest.php:269
+msgid "it looks like a drive-letter path."
+msgstr ""
+
+#: src/Storage/Manifest.php:275
+msgid "it contains an empty path segment."
+msgstr ""
+
+#: src/Storage/Manifest.php:278
+msgid "it contains a relative path segment."
+msgstr ""
+
+#: src/Storage/Manifest.php:283
+msgid "PHP files are never stored in a bundle."
+msgstr ""
+
+#. translators: 1: relative path, 2: MIME type, 3: allowed MIME types.
+#: src/Storage/Manifest.php:313
+msgid "File \"%1$s\" has MIME type \"%2$s\", which this site does not accept. Allowed: %3$s."
+msgstr ""
+
+#: src/Style/ThemeAnalyzer.php:200
+msgid "Base"
+msgstr ""
+
+#: src/Style/ThemeAnalyzer.php:205
+msgid "Contrast"
+msgstr ""
+
+#: src/Style/ThemeAnalyzer.php:327
+msgid "System"
+msgstr ""
+
+#. translators: 1: site title, 2: theme name.
+#: src/Style/ThemeAnalyzer.php:605
+msgid "Build artifacts that look at home on \"%1$s\" (theme: %2$s)."
+msgstr ""
+
+#. translators: %s: comma separated list of palette entries.
+#: src/Style/ThemeAnalyzer.php:618
+msgid "Palette: %s. Prefer these over invented colors."
+msgstr ""
+
+#. translators: 1: background color, 2: text color, 3: link color.
+#: src/Style/ThemeAnalyzer.php:625
+msgid "Page background %1$s, body text %2$s, links %3$s."
+msgstr ""
+
+#. translators: %s: font stacks.
+#: src/Style/ThemeAnalyzer.php:639
+msgid "Font stacks: %s. Load webfonts from the \"src\" URLs in typography.font_families, or fall back to a system stack; never hotlink a font the site does not already ship."
+msgstr ""
+
+#. translators: 1: content width, 2: wide width.
+#: src/Style/ThemeAnalyzer.php:646
+msgid "Keep the main column at %1$s and full-bleed sections at %2$s."
+msgstr ""
+
+#: src/Style/ThemeAnalyzer.php:652
+msgid "Paste css_variables into a <style> block to get the theme presets as custom properties."
+msgstr ""
+
+#: src/Style/ThemeAnalyzer.php:656
+msgid "chrome.header_html and chrome.footer_html are the site header and footer; paste them in with chrome.css, or set wrap=true when publishing and the plugin will do it."
+msgstr ""
+
+#: src/Style/ThemeAnalyzer.php:659
+msgid "Ship one self-contained document. Reference bundle files by relative path (css/app.css), never by absolute URL. Do not inline secrets: the artifact is public HTML."
+msgstr ""

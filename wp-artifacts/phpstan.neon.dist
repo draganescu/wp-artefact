@@ -1,0 +1,26 @@
+parameters:
+	level: 6
+	paths:
+		- wp-artifacts.php
+		- uninstall.php
+		- src
+	bootstrapFiles:
+		- tests/phpstan-bootstrap.php
+	scanFiles:
+		- tests/stubs/wp-cli.php
+	parallel:
+		maximumNumberOfProcesses: 1
+	treatPhpDocTypesAsCertain: false
+	dynamicConstantNames:
+		- WP_CLI
+		- REST_REQUEST
+		- DOING_AUTOSAVE
+		- DISALLOW_UNFILTERED_HTML
+	reportUnmatchedIgnoredErrors: false
+	ignoreErrors:
+		# The Abilities API is core 6.9+; the stubs this repo pins are not there yet.
+		-
+			message: '#Function wp_register_ability(_category)? not found#'
+
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
