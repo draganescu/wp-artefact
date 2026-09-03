@@ -21,8 +21,12 @@ footer. Nothing else touches the payload.
 
 ## Install
 
+The plugin lives in `wp-artifacts/` inside the repository, alongside the build spec, so
+symlink or copy that directory into your plugins folder rather than cloning over it:
+
 ```bash
-git clone https://github.com/draganescu/wp-artifacts wp-content/plugins/wp-artifacts
+git clone https://github.com/draganescu/wp-artefact
+ln -s "$PWD/wp-artefact/wp-artifacts" wp-content/plugins/wp-artifacts
 wp plugin activate wp-artifacts
 ```
 
