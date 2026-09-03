@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace WPArtifacts\Storage;
 
+use WPArtifacts\PostType\ArtifactPostType;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -67,11 +68,33 @@ final class BundleStore {
 	/**
 	 * Directory holding every revision of one artifact.
 	 *
+	 * The name carries a random segment, so a server that has not been told to deny
+	 * direct access to the uploads directory still cannot be walked from
+	 * `artifacts/1/`, `artifacts/2/` and so on. A private artifact's bytes are only as
+	 * private as the hardest-to-guess thing in front of them.
+	 *
 	 * @param int $post_id Artifact ID.
 	 * @return string
 	 */
 	public function post_dir( int $post_id ): string {
-		return $this->base_dir() . '/' . $post_id;
+		return $this->base_dir() . '/' . $post_id . '-' . $this->storage_key( $post_id );
+	}
+
+	/**
+	 * The random segment of an artifact's storage path, created on first use.
+	 *
+	 * @param int $post_id Artifact ID.
+	 * @return string
+	 */
+	public function storage_key( int $post_id ): string {
+		$key = (string) get_post_meta( $post_id, ArtifactPostType::META_STORAGE_KEY, true );
+
+		if ( ! preg_match( '/^[a-f0-9]{32}$/', $key ) ) {
+			$key = bin2hex( random_bytes( 16 ) );
+			update_post_meta( $post_id, ArtifactPostType::META_STORAGE_KEY, $key );
+		}
+
+		return $key;
 	}
 
 	/**
@@ -302,19 +325,26 @@ final class BundleStore {
 			file_put_contents( $index, "<?php\n// Silence is golden.\n" );
 		}
 
+		// The router is the only thing meant to read these files: it checks the
+		// artifact's status and its manifest before serving a byte. Nothing should
+		// reach them directly, so deny the lot.
+		$rules = "Options -Indexes\n"
+			. "<IfModule mod_authz_core.c>\n"
+			. "\tRequire all denied\n"
+			. "</IfModule>\n"
+			. "<IfModule !mod_authz_core.c>\n"
+			. "\tOrder deny,allow\n"
+			. "\tDeny from all\n"
+			. "</IfModule>\n";
+
 		$htaccess = $base . '/.htaccess';
-		if ( ! file_exists( $htaccess ) ) {
-			$rules = "Options -Indexes\n"
-				. "<IfModule mod_authz_core.c>\n"
-				. "\t<FilesMatch \"\\.(php|phtml|phar)$\">\n"
-				. "\t\tRequire all denied\n"
-				. "\t</FilesMatch>\n"
-				. "</IfModule>\n"
-				. "<IfModule !mod_authz_core.c>\n"
-				. "\t<FilesMatch \"\\.(php|phtml|phar)$\">\n"
-				. "\t\tDeny from all\n"
-				. "\t</FilesMatch>\n"
-				. "</IfModule>\n";
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$current = file_exists( $htaccess ) ? (string) file_get_contents( $htaccess ) : '';
+
+		// Rewritten rather than only created, so a site carrying an older and weaker
+		// version of these rules picks up the current ones.
+		if ( $current !== $rules ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			file_put_contents( $htaccess, $rules );
 		}

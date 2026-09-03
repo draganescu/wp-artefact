@@ -122,6 +122,14 @@ settings: point a second host name (say `assets.example.com`) at the same instal
 it, and artifact URLs move to that host while requests on the main host are redirected.
 Setting up the DNS and the virtual host is your job; the plugin only routes.
 
+### Where the bytes live
+
+Bundle files are written to `wp-content/uploads/artifacts/{post_id}-{random}/{revision_id}/`
+and are meant to be read only by the router, which checks the artifact's status and its
+manifest first. The plugin denies direct web access to that directory, and the random
+segment means a server missing that rule still cannot be walked from `artifacts/1/`. See
+the web server notes below — on nginx the rule is yours to add.
+
 ### Response headers
 
 Every artifact response carries `X-Content-Type-Options: nosniff`,
@@ -133,30 +141,25 @@ Nothing sets a cookie. Non-public artifacts get `nocache_headers()` instead of c
 
 ## Web server notes
 
-Bundle assets live in `wp-content/uploads/artifacts/{post_id}/{revision_id}/`. PHP serves
-them through the manifest, which is the point: a file on disk that the manifest does not
-list is a 404. The plugin writes an `index.php` and an `.htaccess` into the storage root
-that turn off directory indexes and refuse to execute PHP there.
+Bundle assets live in `wp-content/uploads/artifacts/{post_id}-{random}/{revision_id}/`.
+**Nothing should read them directly.** PHP serves every byte through the router, which
+checks the artifact's status and its manifest first — a draft's assets are not public,
+and a file on disk the manifest does not list is a 404. Reaching the files directly would
+skip both checks.
 
-On nginx, add the equivalent — there is no `.htaccess`:
+So the plugin writes an `index.php` and an `.htaccess` into the storage root that deny
+direct access outright. On nginx there is no `.htaccess`, so add the equivalent yourself:
 
 ```nginx
 location ^~ /wp-content/uploads/artifacts/ {
-    autoindex off;
-    location ~ \.(php|phtml|phar)$ { deny all; }
+    deny all;
+    return 404;
 }
 ```
 
-If you want the web server to serve assets directly rather than through PHP, map the
-revision-pinned URLs and leave the plain ones to WordPress:
-
-```nginx
-location ~ ^/a/([^/]+)/~r(\d+)/(.+)$ {
-    # Resolve {slug} → {post_id} yourself, e.g. with a map, then:
-    # alias /var/www/wp-content/uploads/artifacts/$post_id/$2/$3;
-    add_header Cache-Control "public, max-age=31536000, immutable";
-}
-```
+The random segment in the directory name means that a server missing this rule still
+cannot be walked from `artifacts/1/`, `artifacts/2/` and so on — but it is a second lock,
+not a substitute for the first. Add the rule.
 
 Behind a WAF or a page cache, exclude `/wp-json/wp-artifacts/` (the upload endpoint and,
 if you use it, the MCP route) and any OAuth routes your auth plugin adds. Caching layers
@@ -173,10 +176,13 @@ catches that by fetching a published artifact and comparing sha256.
 | Whole bundle | 50 MB |
 | Files per bundle | 200 |
 
-Allowed asset MIME types: `text/css`, `text/html`, `text/plain`, `text/javascript`,
-`application/javascript`, `application/json`, `application/wasm`,
-`application/manifest+json`, `image/*`, `font/*`, `video/mp4`, `audio/mpeg`. Extend with
-the `wp_artifacts_allowed_mimes` filter.
+Bundle files are accepted by **extension**, not by the type the caller claims: `css`,
+`js`, `mjs`, `json`, `map`, `html`, `htm`, `txt`, `md`, `csv`, `svg`, `png`, `jpg`,
+`jpeg`, `gif`, `webp`, `avif`, `ico`, `woff`, `woff2`, `ttf`, `otf`, `wasm`, `mp4`,
+`mp3`, `webmanifest`. The stored MIME type comes from that extension; sending a `mime`
+that disagrees with it is refused rather than believed. Extend the list with
+`wp_artifacts_allowed_extensions`, and note that adding an extension your web server
+hands to an interpreter would be a remote code execution hole.
 
 ## Data model
 
@@ -202,7 +208,9 @@ restores the file list along with the content.
 | `wp_artifacts_settings` | The effective settings array |
 | `wp_artifacts_url_prefix` / `wp_artifacts_archive_slug` | URLs |
 | `wp_artifacts_post_type_args` | `register_post_type` arguments |
-| `wp_artifacts_allowed_mimes` | Which asset types are accepted |
+| `wp_artifacts_allowed_extensions` | Which file extensions a bundle may contain, and the type each is stored as |
+| `wp_artifacts_allowed_mimes` | A second gate on the resulting MIME types |
+| `wp_artifacts_mcp_permission` | Who may open the MCP endpoint (default: `edit_artifacts`) |
 | `wp_artifacts_csp` | The policy sent with an artifact |
 | `wp_artifacts_asset_cache_control` | The `Cache-Control` sent with assets |
 | `wp_artifacts_site_style` / `wp_artifacts_chrome` | The style document and captured chrome |

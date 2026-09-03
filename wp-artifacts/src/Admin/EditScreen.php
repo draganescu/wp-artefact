@@ -330,8 +330,10 @@ final class EditScreen {
 			esc_html__( 'Open in a new tab', 'wp-artifacts' )
 		);
 		echo '</div>';
+		// No allow-same-origin: an artifact's script must not be able to act as the
+		// editor who is previewing it. Scripts still run, in an opaque origin.
 		printf(
-			'<iframe class="wp-artifacts-preview__frame" src="%s" title="%s" sandbox="allow-scripts allow-forms allow-popups allow-same-origin"></iframe>',
+			'<iframe class="wp-artifacts-preview__frame" src="%s" title="%s" sandbox="allow-scripts allow-forms allow-popups"></iframe>',
 			esc_url( $url ),
 			esc_attr__( 'Artifact preview', 'wp-artifacts' )
 		);

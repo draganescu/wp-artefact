@@ -948,14 +948,55 @@ final class ArtifactRepository {
 				);
 			}
 
+			$mime = Manifest::guess_mime( $path );
+
+			// A declared type is checked against the extension rather than trusted:
+			// claiming text/plain for a file the server might execute is exactly the
+			// trick this refuses.
+			if ( isset( $file['mime'] ) && '' !== $file['mime'] ) {
+				$declared = strtolower( trim( explode( ';', (string) $file['mime'] )[0] ) );
+
+				if ( $declared !== $mime && ! in_array( $declared, self::mime_aliases( $mime ), true ) ) {
+					return new WP_Error(
+						'artifact_mime_not_allowed',
+						sprintf(
+							/* translators: 1: relative path, 2: declared MIME type, 3: MIME type for the extension. */
+							__( 'File "%1$s" declares MIME type "%2$s" but its extension means "%3$s". Send a matching type, or leave "mime" out and it is derived from the extension.', 'wp-artifacts' ),
+							$path,
+							$declared,
+							$mime
+						),
+						array( 'status' => 400 )
+					);
+				}
+			}
+
 			$decoded[] = array(
 				'path' => $path,
-				'mime' => isset( $file['mime'] ) && '' !== $file['mime'] ? (string) $file['mime'] : Manifest::guess_mime( $path ),
+				'mime' => $mime,
 				'data' => $raw,
 			);
 		}
 
 		return $decoded;
+	}
+
+	/**
+	 * Type names that mean the same thing as the extension's canonical type.
+	 *
+	 * @param string $mime Canonical MIME type for the extension.
+	 * @return array<int,string>
+	 */
+	private static function mime_aliases( string $mime ): array {
+		$aliases = array(
+			'text/javascript' => array( 'application/javascript', 'application/x-javascript', 'text/ecmascript' ),
+			'image/x-icon'    => array( 'image/vnd.microsoft.icon' ),
+			'font/ttf'        => array( 'application/x-font-ttf', 'font/truetype' ),
+			'font/otf'        => array( 'application/x-font-otf', 'font/opentype' ),
+			'text/plain'      => array( 'text/markdown', 'text/csv' ),
+		);
+
+		return $aliases[ $mime ] ?? array();
 	}
 
 	/**

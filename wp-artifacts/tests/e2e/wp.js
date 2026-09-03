@@ -2,6 +2,9 @@
 
 const ADMIN = { user: 'admin', password: 'password' };
 
+// An author: may publish artifacts, has no unfiltered_html.
+const LOW_PRIV = { user: 'lowpriv', password: 'Low-Pass-12345' };
+
 // Core picks the HTTP method from the ability annotations.
 const READ_ONLY = new Set( [ 'get', 'list', 'revisions', 'site-style', 'site-style-resource', 'guide' ] );
 const DELETING = new Set( [ 'delete' ] );
@@ -123,4 +126,4 @@ async function cleanup( request ) {
 const b64 = ( value ) => Buffer.from( value ).toString( 'base64' );
 const pathOf = ( url ) => new URL( url ).pathname;
 
-module.exports = { login, ability, rest, publish, update, cleanup, b64, pathOf, ADMIN };
+module.exports = { login, ability, rest, publish, update, cleanup, b64, pathOf, ADMIN, LOW_PRIV };

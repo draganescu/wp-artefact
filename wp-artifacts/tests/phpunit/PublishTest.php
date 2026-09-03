@@ -193,20 +193,47 @@ final class PublishTest extends ArtifactTestCase {
 	}
 
 	/**
-	 * MIME types outside the allow list are refused.
+	 * File types outside the allow list are refused.
 	 *
 	 * @return void
 	 */
-	public function test_disallowed_mime_is_rejected(): void {
+	public function test_disallowed_extension_is_rejected(): void {
+		foreach ( array( 'thing.bin', 'shell.phtml', 'shell.phar', 'x.cgi' ) as $path ) {
+			$result = ArtifactRepository::instance()->create(
+				array(
+					'title'   => 'Weird',
+					'content' => $this->document(),
+					'files'   => array(
+						array(
+							// A friendly-looking type buys nothing: the extension decides.
+							'path'        => $path,
+							'mime'        => 'text/plain',
+							'data_base64' => base64_encode( 'x' ),
+						),
+					),
+				)
+			);
+
+			$this->assertWPError( $result, "{$path} should be refused." );
+			$this->assertSame( 'artifact_invalid_path', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * A declared type that disagrees with the extension is refused.
+	 *
+	 * @return void
+	 */
+	public function test_mismatched_mime_is_rejected(): void {
 		$result = ArtifactRepository::instance()->create(
 			array(
-				'title'   => 'Weird',
+				'title'   => 'Mismatched',
 				'content' => $this->document(),
 				'files'   => array(
 					array(
-						'path'        => 'thing.bin',
-						'mime'        => 'application/octet-stream',
-						'data_base64' => base64_encode( 'x' ),
+						'path'        => 'a.css',
+						'mime'        => 'text/html',
+						'data_base64' => base64_encode( 'body{}' ),
 					),
 				),
 			)
@@ -214,6 +241,31 @@ final class PublishTest extends ArtifactTestCase {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'artifact_mime_not_allowed', $result->get_error_code() );
+	}
+
+	/**
+	 * The stored type always comes from the extension.
+	 *
+	 * @return void
+	 */
+	public function test_stored_mime_comes_from_the_extension(): void {
+		$result = $this->publish(
+			array(
+				'title'   => 'Typed',
+				'content' => $this->document(),
+				'status'  => 'publish',
+				'files'   => array(
+					array(
+						'path'        => 'app.css',
+						'data_base64' => base64_encode( 'body{}' ),
+					),
+				),
+			)
+		);
+
+		$manifest = ArtifactRepository::instance()->manifest( (int) $result['id'] );
+
+		$this->assertSame( 'text/css', $manifest->file( 'app.css' )['mime'] );
 	}
 
 	/**

@@ -23,6 +23,10 @@
 		{
 			"step": "runPHP",
 			"code": "<?php require_once '/wordpress/wp-load.php'; flush_rewrite_rules( false ); if ( ! is_dir( '/wordpress/artifacts-out' ) ) { mkdir( '/wordpress/artifacts-out', 0777, true ); } require_once ABSPATH . 'wp-admin/includes/user.php'; $user = get_user_by( 'login', 'admin' ); $created = WP_Application_Passwords::create_new_application_password( $user->ID, array( 'name' => 'artifacts-e2e' ) ); file_put_contents( '/wordpress/artifacts-out/app-password.txt', is_wp_error( $created ) ? 'ERROR:' . $created->get_error_message() : $created[0] );"
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php require_once '/wordpress/wp-load.php'; if ( ! get_user_by( 'login', 'lowpriv' ) ) { wp_insert_user( array( 'user_login' => 'lowpriv', 'user_pass' => 'Low-Pass-12345', 'user_email' => 'low@example.com', 'role' => 'author' ) ); } echo 'ok';"
 		}
 	]
 }

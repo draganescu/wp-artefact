@@ -226,11 +226,30 @@ final class Registrar {
 				$observability,
 				$groups['tools'],
 				$groups['resources'],
-				$groups['prompts']
+				$groups['prompts'],
+				array( self::class, 'can_reach_mcp_server' )
 			);
 		} catch ( \Throwable $error ) {
 			unset( $error );
 		}
+	}
+
+	/**
+	 * Who may open the MCP endpoint at all.
+	 *
+	 * The adapter would otherwise let through any logged-in user, subscribers
+	 * included. The individual abilities still enforce their own capabilities; this
+	 * only keeps the door shut for accounts that have no business here.
+	 *
+	 * @return bool
+	 */
+	public static function can_reach_mcp_server(): bool {
+		/**
+		 * Filters who may reach the artifacts MCP endpoint.
+		 *
+		 * @param bool $allowed Whether the current user may open the endpoint.
+		 */
+		return (bool) apply_filters( 'wp_artifacts_mcp_permission', current_user_can( 'edit_artifacts' ) );
 	}
 
 	/**

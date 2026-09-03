@@ -33,6 +33,7 @@ final class ArtifactPostType {
 	public const META_OLD_SLUGS          = '_artifact_old_slugs';
 	public const META_REDIRECT_TO        = '_artifact_redirect_to';
 	public const META_ASSETS_REV         = '_artifact_assets_rev';
+	public const META_STORAGE_KEY        = '_artifact_storage_key';
 
 	public const DEFAULT_CONTENT_TYPE = 'text/html; charset=utf-8';
 
@@ -304,6 +305,18 @@ final class ArtifactPostType {
 				'type'          => 'integer',
 				'single'        => true,
 				'default'       => 0,
+				'show_in_rest'  => false,
+				'auth_callback' => '__return_false',
+			)
+		);
+
+		register_post_meta(
+			self::POST_TYPE,
+			self::META_STORAGE_KEY,
+			array(
+				'type'          => 'string',
+				'single'        => true,
+				'default'       => '',
 				'show_in_rest'  => false,
 				'auth_callback' => '__return_false',
 			)

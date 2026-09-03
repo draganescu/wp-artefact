@@ -153,6 +153,57 @@ final class RevisionsTest extends ArtifactTestCase {
 	}
 
 	/**
+	 * The storage root denies direct access and the path is not guessable.
+	 *
+	 * @return void
+	 */
+	public function test_storage_is_not_reachable_by_guessing(): void {
+		$store = BundleStore::instance();
+		$store->protect_base_dir();
+
+		$htaccess = $store->base_dir() . '/.htaccess';
+
+		$this->assertFileExists( $htaccess );
+
+		$rules = (string) file_get_contents( $htaccess );
+
+		$this->assertStringContainsString( 'Require all denied', $rules );
+		$this->assertStringContainsString( 'Deny from all', $rules );
+		$this->assertStringContainsString( 'Options -Indexes', $rules );
+		$this->assertStringNotContainsString( 'FilesMatch', $rules, 'Everything is denied, not just scripts.' );
+
+		$created = $this->publish(
+			array(
+				'title'   => 'Private bytes',
+				'content' => $this->document(),
+				'status'  => 'private',
+				'files'   => array(
+					array(
+						'path'        => 'secret.css',
+						'data_base64' => base64_encode( 'body{}' ),
+					),
+				),
+			)
+		);
+
+		$post_id = (int) $created['id'];
+
+		// The directory carries a random segment, so it cannot be walked from the
+		// post ID alone even where the deny rules are missing.
+		$this->assertStringNotContainsString(
+			'/artifacts/' . $post_id . '/',
+			$store->post_dir( $post_id ) . '/'
+		);
+		$this->assertMatchesRegularExpression(
+			'#/artifacts/' . $post_id . '-[a-f0-9]{32}$#',
+			$store->post_dir( $post_id )
+		);
+
+		// And it is stable, or the assets of every earlier revision would be lost.
+		$this->assertSame( $store->post_dir( $post_id ), $store->post_dir( $post_id ) );
+	}
+
+	/**
 	 * Deleting an artifact for good removes its stored bundles.
 	 *
 	 * @return void

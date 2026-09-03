@@ -25,6 +25,42 @@ final class Manifest {
 	public const PATH_PATTERN = '#^[A-Za-z0-9._\-/]+$#';
 
 	/**
+	 * Extension to MIME type. This is an allow list: a file whose extension is not a
+	 * key here is refused outright, and the value is the MIME the file is stored and
+	 * served with. The caller does not get to name the type of its own upload.
+	 *
+	 * @var array<string,string>
+	 */
+	private const EXTENSION_TYPES = array(
+		'css'         => 'text/css',
+		'js'          => 'text/javascript',
+		'mjs'         => 'text/javascript',
+		'json'        => 'application/json',
+		'map'         => 'application/json',
+		'html'        => 'text/html',
+		'htm'         => 'text/html',
+		'txt'         => 'text/plain',
+		'md'          => 'text/plain',
+		'csv'         => 'text/plain',
+		'svg'         => 'image/svg+xml',
+		'png'         => 'image/png',
+		'jpg'         => 'image/jpeg',
+		'jpeg'        => 'image/jpeg',
+		'gif'         => 'image/gif',
+		'webp'        => 'image/webp',
+		'avif'        => 'image/avif',
+		'ico'         => 'image/x-icon',
+		'woff'        => 'font/woff',
+		'woff2'       => 'font/woff2',
+		'ttf'         => 'font/ttf',
+		'otf'         => 'font/otf',
+		'wasm'        => 'application/wasm',
+		'mp4'         => 'video/mp4',
+		'mp3'         => 'audio/mpeg',
+		'webmanifest' => 'application/manifest+json',
+	);
+
+	/**
 	 * Entry document path.
 	 *
 	 * @var string
@@ -165,7 +201,9 @@ final class Manifest {
 				);
 			}
 
-			$mime       = isset( $payload['mime'] ) && '' !== $payload['mime'] ? (string) $payload['mime'] : self::guess_mime( $path );
+			// The extension decides the type; a caller-supplied one was already checked
+			// against it before we got here.
+			$mime       = self::guess_mime( $path );
 			$mime_check = self::validate_mime( $path, $mime );
 			if ( is_wp_error( $mime_check ) ) {
 				return $mime_check;
@@ -279,11 +317,37 @@ final class Manifest {
 			}
 		}
 
-		if ( str_ends_with( $path, '.php' ) || false !== strpos( strtolower( $path ), '.php.' ) ) {
-			return $error( __( 'PHP files are never stored in a bundle.', 'wp-artifacts' ) );
+		$extension = strtolower( (string) pathinfo( $path, PATHINFO_EXTENSION ) );
+
+		if ( ! array_key_exists( $extension, self::extension_types() ) ) {
+			return $error(
+				sprintf(
+					/* translators: %s: comma separated list of file extensions. */
+					__( 'the extension is not one this site stores. Allowed: %s.', 'wp-artifacts' ),
+					implode( ', ', array_keys( self::extension_types() ) )
+				)
+			);
 		}
 
 		return true;
+	}
+
+	/**
+	 * The extension allow list, filterable for sites that need another file type.
+	 *
+	 * @return array<string,string> Extension to the MIME type it is stored with.
+	 */
+	public static function extension_types(): array {
+		/**
+		 * Filters the file extensions a bundle may contain.
+		 *
+		 * The value of each entry is the MIME type the file is stored and served with;
+		 * a caller-supplied type never overrides it. Adding an extension that the web
+		 * server executes would be a remote code execution hole, so add with care.
+		 *
+		 * @param array<string,string> $types Extension to MIME type.
+		 */
+		return (array) apply_filters( 'wp_artifacts_allowed_extensions', self::EXTENSION_TYPES );
 	}
 
 	/**
@@ -327,36 +391,9 @@ final class Manifest {
 	 */
 	public static function guess_mime( string $path ): string {
 		$extension = strtolower( (string) pathinfo( $path, PATHINFO_EXTENSION ) );
+		$types     = self::extension_types();
 
-		$map = array(
-			'css'         => 'text/css',
-			'js'          => 'text/javascript',
-			'mjs'         => 'text/javascript',
-			'json'        => 'application/json',
-			'html'        => 'text/html',
-			'htm'         => 'text/html',
-			'txt'         => 'text/plain',
-			'md'          => 'text/plain',
-			'csv'         => 'text/plain',
-			'svg'         => 'image/svg+xml',
-			'png'         => 'image/png',
-			'jpg'         => 'image/jpeg',
-			'jpeg'        => 'image/jpeg',
-			'gif'         => 'image/gif',
-			'webp'        => 'image/webp',
-			'avif'        => 'image/avif',
-			'ico'         => 'image/x-icon',
-			'woff'        => 'font/woff',
-			'woff2'       => 'font/woff2',
-			'ttf'         => 'font/ttf',
-			'otf'         => 'font/otf',
-			'wasm'        => 'application/wasm',
-			'mp4'         => 'video/mp4',
-			'mp3'         => 'audio/mpeg',
-			'webmanifest' => 'application/manifest+json',
-		);
-
-		return $map[ $extension ] ?? 'application/octet-stream';
+		return $types[ $extension ] ?? 'application/octet-stream';
 	}
 
 	/**

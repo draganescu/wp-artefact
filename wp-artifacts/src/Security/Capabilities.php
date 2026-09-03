@@ -224,8 +224,39 @@ final class Capabilities {
 	 * @return bool
 	 */
 	public static function asset_is_executable( string $path, string $mime ): bool {
-		$extension = strtolower( (string) pathinfo( $path, PATHINFO_EXTENSION ) );
-		if ( in_array( $extension, array( 'js', 'mjs', 'cjs', 'jsx', 'ts', 'wasm', 'html', 'htm', 'svg' ), true ) ) {
+		$extension  = strtolower( (string) pathinfo( $path, PATHINFO_EXTENSION ) );
+		$executable = array(
+			// Runs in the visitor's browser.
+			'js',
+			'mjs',
+			'cjs',
+			'jsx',
+			'ts',
+			'wasm',
+			'html',
+			'htm',
+			'svg',
+			'xhtml',
+			// Runs on the server if it ever reaches an interpreter. The extension allow
+			// list in Manifest already refuses these; this is the second lock.
+			'php',
+			'php3',
+			'php4',
+			'php5',
+			'php7',
+			'php8',
+			'phps',
+			'phtml',
+			'phar',
+			'cgi',
+			'pl',
+			'py',
+			'rb',
+			'sh',
+			'htaccess',
+		);
+
+		if ( in_array( $extension, $executable, true ) ) {
 			return true;
 		}
 

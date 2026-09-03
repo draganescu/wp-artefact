@@ -111,10 +111,17 @@ test( 'bad input comes back as an actionable error, not a stack trace', async ( 
 	expect( traversal.code ).toBe( 'artifact_invalid_path' );
 	expect( traversal.message ).toContain( '../secrets.css' );
 
-	const mime = await ability( request, 'wp-artifacts/publish', {
+	const extension = await ability( request, 'wp-artifacts/publish', {
 		title: 'Bad',
 		content: DOC,
 		files: [ { path: 'a.bin', mime: 'application/octet-stream', data_base64: 'eA==' } ],
+	} );
+	expect( extension.code ).toBe( 'artifact_invalid_path' );
+
+	const mime = await ability( request, 'wp-artifacts/publish', {
+		title: 'Bad',
+		content: DOC,
+		files: [ { path: 'a.css', mime: 'text/html', data_base64: 'eA==' } ],
 	} );
 	expect( mime.code ).toBe( 'artifact_mime_not_allowed' );
 
