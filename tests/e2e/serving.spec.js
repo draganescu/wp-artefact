@@ -251,6 +251,36 @@ test( 'a deleted artifact answers 410, or 301 when a target was given', async ( 
 	expect( refused.headers().location ).not.toContain( 'evil.example' );
 } );
 
+test( 'the document is served at its own URL and nowhere else', async ( { request } ) => {
+	const loud =
+		'<!doctype html><html><head><style>body{background:#c00}</style></head>' +
+		'<body><h1>LOUD ARTIFACT</h1></body></html>';
+
+	const artifact = await publish( request, {
+		title: 'Loud artifact',
+		slug: 'loud',
+		status: 'publish',
+		excerpt: 'a short description',
+		content: loud,
+	} );
+
+	// Its own URL: the bytes, exactly.
+	expect( await ( await request.get( artifact.url ) ).text() ).toBe( loud );
+
+	// Anywhere a theme renders it, the document must not be poured into the page —
+	// its stylesheet would restyle the surrounding design and its scripts would run
+	// in a context it was never granted.
+	for ( const path of [ '/artifacts/', '/?s=LOUD' ] ) {
+		const body = await ( await request.get( path ) ).text();
+
+		expect( body, `${ path } must not inline the document` ).not.toContain( '<h1>LOUD ARTIFACT</h1>' );
+		expect( body, `${ path } must not leak its stylesheet` ).not.toContain( 'body{background:#c00}' );
+	}
+
+	// The excerpt still describes it, so the archive is useful.
+	expect( await ( await request.get( '/artifacts/' ) ).text() ).toContain( 'a short description' );
+} );
+
 test( 'an unknown artifact URL is answered by the router, not the theme', async ( { request } ) => {
 	const response = await request.get( '/a/__probe__/' );
 

@@ -72,6 +72,10 @@ final class ArtifactPostType {
 		add_filter( 'wp_sitemaps_posts_query_args', array( $this, 'sitemap_query_args' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $this, 'exclude_from_feeds' ) );
 
+		// An artifact's bytes are served by the router and nowhere else.
+		add_filter( 'the_content', array( $this, 'never_render_document' ), PHP_INT_MAX );
+		add_filter( 'get_the_excerpt', array( $this, 'summary_excerpt' ), PHP_INT_MAX, 2 );
+
 		// Verbatim REST round-trip for wp/v2/artifacts.
 		add_filter( 'rest_pre_insert_' . self::POST_TYPE, array( $this, 'rest_pre_insert' ), 10, 2 );
 		add_action( 'rest_after_insert_' . self::POST_TYPE, array( $this, 'rest_after_insert' ), 10, 3 );
@@ -468,6 +472,66 @@ final class ArtifactPostType {
 
 		$post_type = array_values( array_diff( $post_type, array( self::POST_TYPE ) ) );
 		$query->set( 'post_type', empty( $post_type ) ? array( 'post' ) : $post_type );
+	}
+
+	/**
+	 * Keeps an artifact's document out of any page that is not the artifact.
+	 *
+	 * The router serves artifacts itself and exits, so every call that reaches this
+	 * filter is a theme, an archive, a search result or a REST `content.rendered` —
+	 * places where dropping a whole HTML document into the middle of somebody else's
+	 * page would leak its styles over the surrounding design, run its scripts in a
+	 * context it was never granted, and expose a draft's body through the excerpt.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public function never_render_document( $content ) {
+		$post = get_post();
+
+		if ( ! $post instanceof \WP_Post || self::POST_TYPE !== $post->post_type ) {
+			return $content;
+		}
+
+		$summary = '' !== (string) $post->post_excerpt
+			? '<p>' . esc_html( (string) $post->post_excerpt ) . '</p>'
+			: '';
+
+		$summary .= sprintf(
+			'<p><a class="wp-artifacts-permalink" href="%1$s">%2$s</a></p>',
+			esc_url( (string) get_permalink( $post ) ),
+			esc_html__( 'Open the artifact', 'wp-artifacts' )
+		);
+
+		/**
+		 * Filters what stands in for an artifact wherever it is not being served.
+		 *
+		 * Returning the document itself here puts raw, unfiltered HTML inside a theme
+		 * template. There is a reason this is not the default.
+		 *
+		 * @param string   $summary Markup shown in place of the document.
+		 * @param \WP_Post $post    The artifact.
+		 */
+		return (string) apply_filters( 'wp_artifacts_document_placeholder', $summary, $post );
+	}
+
+	/**
+	 * Stops WordPress building an excerpt out of the artifact's markup.
+	 *
+	 * @param string        $excerpt Generated excerpt.
+	 * @param \WP_Post|null $post    Post the excerpt belongs to.
+	 * @return string
+	 */
+	public function summary_excerpt( $excerpt, $post = null ) {
+		$post = $post instanceof \WP_Post ? $post : get_post();
+
+		if ( ! $post instanceof \WP_Post || self::POST_TYPE !== $post->post_type ) {
+			return $excerpt;
+		}
+
+		// An auto-generated excerpt is post_content with the tags stripped, which for
+		// an artifact means its stylesheet and script bodies as prose.
+		return (string) $post->post_excerpt;
 	}
 
 	/**

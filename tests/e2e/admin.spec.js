@@ -43,7 +43,11 @@ test( 'the edit screen shows code and preview, never the block editor', async ( 
 	await loginUi( page );
 	await page.goto( `/wp-admin/post.php?post=${ artifact.id }&action=edit` );
 
+	// The stored bytes, not WordPress's edit-context copy of them: core runs
+	// post_content through format_to_edit() before a meta box sees it, which escapes
+	// the markup for browsers it does not recognise.
 	await expect( page.locator( '.wp-artifacts-code' ) ).toHaveValue( DOC );
+	expect( await page.locator( '.wp-artifacts-code' ).inputValue() ).not.toContain( '&lt;' );
 	await expect( page.locator( '.wp-artifacts-preview__frame' ) ).toBeVisible();
 	await expect( page.locator( '#wp_artifacts_delivery' ) ).toBeVisible();
 	await expect( page.locator( '#wp_artifacts_provenance' ) ).toBeVisible();

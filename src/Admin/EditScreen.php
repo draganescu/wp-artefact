@@ -241,9 +241,15 @@ final class EditScreen {
 	public function render_code_box( $post ): void {
 		wp_nonce_field( self::NONCE, self::NONCE . '_nonce' );
 
-		$repository   = ArtifactRepository::instance();
-		$manifest     = $repository->manifest( (int) $post->ID );
-		$content      = (string) $post->post_content;
+		$repository = ArtifactRepository::instance();
+		$manifest   = $repository->manifest( (int) $post->ID );
+
+		// Not $post->post_content: a meta box is handed the post in "edit" context,
+		// where core has already run post_content through format_to_edit(), which
+		// escapes it when the rich editor is off. Escaping that again would show the
+		// entities themselves, and the size and checksum below would describe the
+		// escaped string rather than the artifact.
+		$content      = (string) get_post_field( 'post_content', (int) $post->ID, 'raw' );
 		$content_type = (string) get_post_meta( (int) $post->ID, ArtifactPostType::META_CONTENT_TYPE, true );
 		$content_type = '' !== $content_type ? $content_type : ArtifactPostType::DEFAULT_CONTENT_TYPE;
 
