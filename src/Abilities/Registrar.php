@@ -1,6 +1,6 @@
 <?php
 /**
- * Registers every ability and, when the MCP Adapter is present, an MCP server.
+ * Registers every ability.
  *
  * @package WPArtifacts
  */
@@ -18,6 +18,12 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * The plugin's whole API surface.
+ *
+ * Abilities are registered and nothing else. The WordPress MCP Adapter, when it is
+ * installed, exposes them on its own server: it reads `meta.public` to decide what is
+ * exposed and `meta.mcp.type` to sort tools from resources and prompts. Standing up a
+ * second MCP server here would only give site owners two endpoints to secure and keep
+ * in step, so the adapter owns the transport and this plugin owns the abilities.
  */
 final class Registrar {
 
@@ -53,7 +59,6 @@ final class Registrar {
 	public function hooks(): void {
 		add_action( 'wp_abilities_api_categories_init', array( $this, 'register_category' ) );
 		add_action( 'wp_abilities_api_init', array( $this, 'register_all' ) );
-		add_action( 'mcp_adapter_init', array( $this, 'register_mcp_server' ) );
 		add_action( 'admin_notices', array( $this, 'missing_api_notice' ) );
 	}
 
@@ -139,133 +144,6 @@ final class Registrar {
 
 			wp_register_ability( self::NAMESPACE_PREFIX . '/' . $slug, $args );
 		}
-	}
-
-	/**
-	 * Ability names grouped the way the MCP Adapter wants them.
-	 *
-	 * @return array<string,array<int,string>>
-	 */
-	public static function mcp_groups(): array {
-		$name = static function ( string $slug ): string {
-			return self::NAMESPACE_PREFIX . '/' . $slug;
-		};
-
-		return array(
-			'tools'     => array_map(
-				$name,
-				array( 'publish', 'update', 'get', 'list', 'revisions', 'rollback', 'delete', 'share', 'screenshot', 'set-front-page', 'upload-url', 'site-style' )
-			),
-			'resources' => array_map( $name, array( 'site-style-resource' ) ),
-			'prompts'   => array_map( $name, array( 'guide' ) ),
-		);
-	}
-
-	/**
-	 * Registers an MCP server with the WordPress MCP Adapter when it is active.
-	 *
-	 * Never fatal: the adapter's constructor signature is not this plugin's contract.
-	 *
-	 * @param mixed $adapter The adapter instance passed by the action.
-	 * @return void
-	 */
-	public function register_mcp_server( $adapter = null ): void {
-		/**
-		 * Filters whether this plugin registers its own MCP server.
-		 *
-		 * Set to false to expose the abilities through a server you configure yourself.
-		 *
-		 * @param bool $enabled Enabled by default.
-		 */
-		if ( ! apply_filters( 'wp_artifacts_register_mcp_server', true ) ) {
-			return;
-		}
-
-		if ( ! is_object( $adapter ) || ! method_exists( $adapter, 'create_server' ) ) {
-			return;
-		}
-
-		$transport = $this->first_existing_class(
-			array(
-				'\\WP\\MCP\\Transport\\HttpTransport',
-				'\\WP\\MCP\\Transport\\Http\\RestTransport',
-				'\\WP\\MCP\\Transport\\Http\\StreamableTransport',
-			)
-		);
-
-		$error_handler = $this->first_existing_class(
-			array(
-				'\\WP\\MCP\\Infrastructure\\ErrorHandling\\NullMcpErrorHandler',
-				'\\WP\\MCP\\Infrastructure\\ErrorHandling\\ErrorLogMcpErrorHandler',
-			)
-		);
-
-		$observability = $this->first_existing_class(
-			array(
-				'\\WP\\MCP\\Infrastructure\\Observability\\NullMcpObservabilityHandler',
-				'\\WP\\MCP\\Infrastructure\\Observability\\ErrorLogMcpObservabilityHandler',
-			)
-		);
-
-		if ( null === $transport || null === $error_handler || null === $observability ) {
-			return;
-		}
-
-		$groups = self::mcp_groups();
-
-		try {
-			$adapter->create_server(
-				'wp-artifacts',
-				'wp-artifacts',
-				'mcp',
-				__( 'Artifacts', 'wp-artifacts' ),
-				__( 'Publish and manage self-contained HTML artifacts on this WordPress site.', 'wp-artifacts' ),
-				'v1',
-				array( $transport ),
-				$error_handler,
-				$observability,
-				$groups['tools'],
-				$groups['resources'],
-				$groups['prompts'],
-				array( self::class, 'can_reach_mcp_server' )
-			);
-		} catch ( \Throwable $error ) {
-			unset( $error );
-		}
-	}
-
-	/**
-	 * Who may open the MCP endpoint at all.
-	 *
-	 * The adapter would otherwise let through any logged-in user, subscribers
-	 * included. The individual abilities still enforce their own capabilities; this
-	 * only keeps the door shut for accounts that have no business here.
-	 *
-	 * @return bool
-	 */
-	public static function can_reach_mcp_server(): bool {
-		/**
-		 * Filters who may reach the artifacts MCP endpoint.
-		 *
-		 * @param bool $allowed Whether the current user may open the endpoint.
-		 */
-		return (bool) apply_filters( 'wp_artifacts_mcp_permission', current_user_can( 'edit_artifacts' ) );
-	}
-
-	/**
-	 * The first class name in a list that actually exists.
-	 *
-	 * @param array<int,string> $candidates Fully qualified class names.
-	 * @return string|null
-	 */
-	private function first_existing_class( array $candidates ): ?string {
-		foreach ( $candidates as $candidate ) {
-			if ( class_exists( $candidate ) ) {
-				return $candidate;
-			}
-		}
-
-		return null;
 	}
 
 	/**

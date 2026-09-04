@@ -308,11 +308,11 @@ final class SettingsPage {
 				? esc_html(
 					sprintf(
 						/* translators: %s: MCP endpoint URL. */
-						__( 'MCP Adapter: active. Point your client at %s.', 'wp-artifacts' ),
-						rest_url( 'wp-artifacts/mcp' )
+						__( 'MCP Adapter: active. It exposes these abilities on its own server; point your client at %s.', 'wp-artifacts' ),
+						rest_url( 'mcp/mcp-adapter-default-server' )
 					)
 				)
-				: esc_html__( 'MCP Adapter: not active. Install the WordPress MCP Adapter plugin to expose these tools over MCP. Everything else keeps working without it.', 'wp-artifacts' )
+				: esc_html__( 'MCP Adapter: not active. Install the WordPress MCP Adapter plugin and it will pick these abilities up. This plugin registers no MCP server of its own, and everything else keeps working without the adapter.', 'wp-artifacts' )
 		);
 
 		printf(

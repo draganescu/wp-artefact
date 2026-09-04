@@ -21,12 +21,8 @@ footer. Nothing else touches the payload.
 
 ## Install
 
-The plugin lives in `wp-artifacts/` inside the repository, alongside the build spec, so
-symlink or copy that directory into your plugins folder rather than cloning over it:
-
 ```bash
-git clone https://github.com/draganescu/wp-artefact
-ln -s "$PWD/wp-artefact/wp-artifacts" wp-content/plugins/wp-artifacts
+git clone https://github.com/draganescu/wp-artefact wp-content/plugins/wp-artifacts
 wp plugin activate wp-artifacts
 ```
 
@@ -47,10 +43,24 @@ The `a` prefix and the archive slug are settings, and are filterable with
 
 ## Publishing from an agent
 
-With the [WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter) active, point
-your client at `https://example.com/wp-json/wp-artifacts/mcp`. Authentication is the
-adapter's business: application passwords out of the box, or OAuth through whichever
-plugin you install. This plugin stores no credentials and has no auth UI.
+This plugin registers **abilities and nothing else** — it stands up no MCP server of its
+own. Install the [WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter) and it
+picks them up automatically: its default server reads `meta.public` to decide what to
+expose and `meta.mcp.type` to sort tools from resources and prompts. Point your client at
+the adapter's endpoint, by default:
+
+```
+https://example.com/wp-json/mcp/mcp-adapter-default-server
+```
+
+The site style resource (`wp://site/style`) and the agent guide are discovered as a
+resource and a prompt; the rest are reachable as tools. Where and how that server is
+routed, and who may reach it, are the adapter's settings to make — this plugin does not
+second-guess them. Each ability still enforces its own capability check on every call.
+
+Authentication is likewise the adapter's business: application passwords out of the box,
+or OAuth through whichever plugin you install. This plugin stores no credentials and has
+no auth UI.
 
 **Claude / Claude Code**: add the endpoint as a remote MCP server and authenticate with an
 application password (Users → Profile → Application Passwords).
@@ -210,13 +220,11 @@ restores the file list along with the content.
 | `wp_artifacts_post_type_args` | `register_post_type` arguments |
 | `wp_artifacts_allowed_extensions` | Which file extensions a bundle may contain, and the type each is stored as |
 | `wp_artifacts_allowed_mimes` | A second gate on the resulting MIME types |
-| `wp_artifacts_mcp_permission` | Who may open the MCP endpoint (default: `edit_artifacts`) |
 | `wp_artifacts_csp` | The policy sent with an artifact |
 | `wp_artifacts_asset_cache_control` | The `Cache-Control` sent with assets |
 | `wp_artifacts_site_style` / `wp_artifacts_chrome` | The style document and captured chrome |
 | `wp_artifacts_guide` | The agent guide |
 | `wp_artifacts_ability_args` | One ability definition before registration |
-| `wp_artifacts_register_mcp_server` | Set false to configure the MCP server yourself |
 | `wp_artifacts_parent_post_types` | Which post types an artifact may represent |
 | `wp_artifacts_allow_front_page` | Whether artifacts appear in the front page dropdown |
 | `wp_artifacts_enable_convert` | Shows the (v2) "Convert to blocks" box |

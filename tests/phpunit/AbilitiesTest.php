@@ -86,27 +86,47 @@ final class AbilitiesTest extends ArtifactTestCase {
 	}
 
 	/**
-	 * The MCP groups cover every registered ability exactly once.
+	 * Every ability carries the metadata the MCP Adapter reads.
+	 *
+	 * The adapter's default server decides what to expose from `meta.public`, and sorts
+	 * tools from resources and prompts by `meta.mcp.type`. This plugin registers no MCP
+	 * server itself, so this metadata is the whole integration.
 	 *
 	 * @return void
 	 */
-	public function test_mcp_groups_are_complete(): void {
-		$groups = Registrar::mcp_groups();
-		$listed = array_merge( $groups['tools'], $groups['resources'], $groups['prompts'] );
+	public function test_abilities_are_discoverable_by_the_adapter(): void {
+		$types = array();
 
-		$expected = array_map(
-			static function ( string $slug ): string {
-				return 'wp-artifacts/' . $slug;
-			},
-			array_keys( Registrar::abilities() )
+		foreach ( Registrar::abilities() as $slug => $class_name ) {
+			$meta = $class_name::definition()['meta'];
+
+			$this->assertTrue( $meta['public'], "{$slug} is exposed to MCP clients" );
+			$this->assertArrayHasKey( 'mcp', $meta, "{$slug} declares its MCP metadata" );
+			$this->assertContains(
+				$meta['mcp']['type'],
+				array( 'tool', 'resource', 'prompt' ),
+				"{$slug} declares a type the adapter understands"
+			);
+
+			$types[ $meta['mcp']['type'] ][] = $slug;
+		}
+
+		$this->assertContains( 'site-style-resource', $types['resource'] );
+		$this->assertContains( 'guide', $types['prompt'] );
+		$this->assertContains( 'publish', $types['tool'] );
+	}
+
+	/**
+	 * The plugin does not stand up an MCP server of its own.
+	 *
+	 * @return void
+	 */
+	public function test_no_mcp_server_is_registered(): void {
+		$this->assertFalse(
+			method_exists( Registrar::class, 'register_mcp_server' ),
+			'The MCP Adapter owns the transport; this plugin only registers abilities.'
 		);
-
-		sort( $listed );
-		sort( $expected );
-
-		$this->assertSame( $expected, $listed );
-		$this->assertContains( 'wp-artifacts/site-style-resource', $groups['resources'] );
-		$this->assertContains( 'wp-artifacts/guide', $groups['prompts'] );
+		$this->assertSame( 0, (int) has_action( 'mcp_adapter_init' ) );
 	}
 
 	/**
