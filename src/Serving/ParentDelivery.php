@@ -22,7 +22,13 @@ defined( 'ABSPATH' ) || exit;
  */
 final class ParentDelivery {
 
-	public const QUERY_ARG = 'artifact';
+	/**
+	 * The query argument that forces or suppresses delivery.
+	 *
+	 * Not `artifact`: that is the post type's own public query var, so `?artifact=1`
+	 * was read as a request for the artifact with slug "1" and answered 404.
+	 */
+	public const QUERY_ARG = 'artifact_preview';
 
 	/**
 	 * Singleton instance.
@@ -73,6 +79,13 @@ final class ParentDelivery {
 			return;
 		}
 
+		// The artifact stands in for the parent, so the parent's protection applies
+		// first. WordPress enforces post passwords inside the_content(), which never
+		// runs once send_entry() has written the body and exited.
+		if ( post_password_required( $parent ) ) {
+			return;
+		}
+
 		$artifact = $this->artifact_for( $parent, '1' === $mode );
 		if ( ! $artifact instanceof WP_Post ) {
 			return;
@@ -115,7 +128,7 @@ final class ParentDelivery {
 	 * Resolves the artifact that should stand in for a post.
 	 *
 	 * @param WP_Post $post   Post or page being requested.
-	 * @param bool    $forced Whether `?artifact=1` was used.
+	 * @param bool    $forced Whether `?artifact_preview=1` was used.
 	 * @return WP_Post|null
 	 */
 	public function artifact_for( WP_Post $post, bool $forced = false ): ?WP_Post {

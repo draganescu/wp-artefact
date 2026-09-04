@@ -101,24 +101,58 @@ final class ListArtifacts implements Ability {
 	public static function execute( $input = array() ) {
 		$input = (array) $input;
 
-		$can_read_private = current_user_can( 'read_private_artifacts' ) || current_user_can( 'edit_artifacts' );
+		// Reading everyone's unpublished artifacts needs read_private_artifacts.
+		// edit_artifacts, which contributors hold, earns you only your own.
+		$can_read_all  = current_user_can( 'read_private_artifacts' );
+		$can_read_mine = current_user_can( 'edit_artifacts' );
 
-		$status = isset( $input['status'] ) && '' !== $input['status'] ? (string) $input['status'] : ( $can_read_private ? 'any' : 'publish' );
-		if ( ! $can_read_private ) {
-			$status = 'publish';
-		}
+		$mine       = array();
+		$non_public = array( 'private', 'draft', 'pending', 'future' );
+		$requested  = isset( $input['status'] ) && '' !== $input['status'] ? (string) $input['status'] : 'any';
 
 		$per_page = isset( $input['per_page'] ) ? max( 1, min( 100, (int) $input['per_page'] ) ) : 20;
 		$page     = isset( $input['page'] ) ? max( 1, (int) $input['page'] ) : 1;
 
 		$args = array(
 			'post_type'      => ArtifactPostType::POST_TYPE,
-			'post_status'    => 'any' === $status ? array( 'publish', 'private', 'draft', 'pending', 'future' ) : $status,
+			'post_status'    => 'any' === $requested ? array_merge( array( 'publish' ), $non_public ) : $requested,
 			'posts_per_page' => $per_page,
 			'paged'          => $page,
 			'orderby'        => 'modified',
 			'order'          => 'DESC',
 		);
+
+		if ( ! $can_read_all ) {
+			if ( ! $can_read_mine ) {
+				// No standing to see anything unpublished.
+				$args['post_status'] = 'publish';
+			} elseif ( 'any' === $requested ) {
+				// Everyone's published work, plus this user's own unpublished work.
+				// Two separate constraints, so it is stated rather than inferred from
+				// WP_Query's status handling.
+				$args['post_status'] = 'publish';
+				$args['author']      = 0;
+
+				$mine = get_posts(
+					array(
+						'post_type'        => ArtifactPostType::POST_TYPE,
+						'post_status'      => $non_public,
+						'author'           => get_current_user_id(),
+						'numberposts'      => $per_page,
+						'orderby'          => 'modified',
+						'order'            => 'DESC',
+						'suppress_filters' => false,
+					)
+				);
+			} elseif ( in_array( $requested, $non_public, true ) ) {
+				// A specific unpublished status: only the caller's own rows qualify.
+				$args['author'] = get_current_user_id();
+			}
+		}
+
+		if ( isset( $args['author'] ) && 0 === $args['author'] ) {
+			unset( $args['author'] );
+		}
 
 		if ( isset( $input['parent_id'] ) && (int) $input['parent_id'] > 0 ) {
 			$args['post_parent'] = (int) $input['parent_id'];
@@ -132,7 +166,24 @@ final class ListArtifacts implements Ability {
 		$repository = ArtifactRepository::instance();
 		$items      = array();
 
-		foreach ( $query->posts as $post ) {
+		$posts = array();
+		foreach ( array_merge( $mine, $query->posts ) as $found ) {
+			if ( $found instanceof \WP_Post ) {
+				$posts[] = $found;
+			}
+		}
+
+		if ( ! empty( $mine ) ) {
+			usort(
+				$posts,
+				static function ( \WP_Post $a, \WP_Post $b ): int {
+					return strcmp( (string) $b->post_modified_gmt, (string) $a->post_modified_gmt );
+				}
+			);
+			$posts = array_slice( $posts, 0, $per_page );
+		}
+
+		foreach ( $posts as $post ) {
 			$record = $repository->record( $post, false, current_user_can( 'edit_post', (int) $post->ID ) );
 
 			$items[] = array(
@@ -153,7 +204,7 @@ final class ListArtifacts implements Ability {
 
 		return array(
 			'items'       => $items,
-			'total'       => (int) $query->found_posts,
+			'total'       => (int) $query->found_posts + count( $mine ),
 			'total_pages' => (int) $query->max_num_pages,
 			'page'        => $page,
 		);

@@ -211,10 +211,14 @@ final class UploadUrl implements Ability {
 		delete_transient( $key );
 
 		$user_id = (int) $ticket['user_id'];
-		if ( $user_id <= 0 ) {
+		$user    = $user_id > 0 ? get_userdata( $user_id ) : false;
+
+		// The ticket names an identity; confirm it still exists and still belongs here
+		// before assuming it. A deleted or removed account must not keep write access.
+		if ( ! $user || ( is_multisite() && ! is_user_member_of_blog( $user_id, get_current_blog_id() ) ) ) {
 			return new WP_Error(
 				'artifact_forbidden',
-				__( 'That upload ticket has no owner.', 'wp-artifacts' ),
+				__( 'The account that requested this upload URL no longer has access to this site.', 'wp-artifacts' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -222,9 +226,12 @@ final class UploadUrl implements Ability {
 		$previous_user = get_current_user_id();
 		wp_set_current_user( $user_id );
 
-		$result = $this->store_upload( $request, $ticket );
-
-		wp_set_current_user( $previous_user );
+		try {
+			$result = $this->store_upload( $request, $ticket );
+		} finally {
+			// Restore on every path, including a fatal inside the upload.
+			wp_set_current_user( $previous_user );
+		}
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
@@ -314,7 +321,18 @@ final class UploadUrl implements Ability {
 		$artifact_id = (int) $ticket['artifact_id'];
 
 		if ( $artifact_id > 0 ) {
+			// Authorized again at redemption, not only at mint: the ticket may outlive
+			// the access that earned it.
+			$post = Registrar::resolve_writable( array( 'id' => $artifact_id ) );
+			if ( is_wp_error( $post ) ) {
+				return $post;
+			}
+
 			return $repository->update( $artifact_id, $args );
+		}
+
+		if ( is_wp_error( Registrar::can_write() ) ) {
+			return Registrar::can_write();
 		}
 
 		$args['title']  = '' !== (string) $ticket['title'] ? (string) $ticket['title'] : __( 'Uploaded artifact', 'wp-artifacts' );

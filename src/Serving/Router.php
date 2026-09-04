@@ -122,7 +122,7 @@ final class Router {
 			return;
 		}
 
-		if ( $this->maybe_redirect_to_cookieless_host( $post, $subpath ) ) {
+		if ( Statuses::can_view( $post ) && $this->maybe_redirect_to_cookieless_host( $post, $subpath ) ) {
 			return;
 		}
 
@@ -245,7 +245,8 @@ final class Router {
 		}
 
 		$repository = ArtifactRepository::instance();
-		$immutable  = true;
+		// Only a revision-pinned URL names bytes that can never change.
+		$immutable = false;
 
 		if ( $revision_id > 0 ) {
 			$revision = wp_get_post_revision( $revision_id );
@@ -258,6 +259,7 @@ final class Router {
 			$manifest   = $repository->manifest( $revision_id );
 			$assets_rev = (int) get_post_meta( $revision_id, ArtifactPostType::META_ASSETS_REV, true );
 			$assets_rev = $assets_rev > 0 ? $assets_rev : $revision_id;
+			$immutable  = true;
 		} else {
 			$manifest   = $repository->manifest( (int) $post->ID );
 			$assets_rev = $repository->assets_revision( (int) $post->ID );
@@ -318,7 +320,10 @@ final class Router {
 			$redirect_to = (string) $gone[ $slug ];
 
 			if ( '' !== $redirect_to ) {
-				Responder::instance()->send_redirect( $redirect_to, false );
+				// Safe redirect: `redirect_to` comes from whoever could delete the
+				// artifact, which includes contributors deleting their own. An
+				// off-site target needs an entry in allowed_redirect_hosts.
+				Responder::instance()->send_redirect( $redirect_to );
 
 				return;
 			}

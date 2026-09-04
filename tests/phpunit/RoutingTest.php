@@ -130,7 +130,7 @@ final class RoutingTest extends ArtifactTestCase {
 		$this->assertNull( ParentDelivery::instance()->artifact_for( get_post( $page_id ) ) );
 
 		$forced = ParentDelivery::instance()->artifact_for( get_post( $page_id ), true );
-		$this->assertInstanceOf( \WP_Post::class, $forced, '?artifact=1 previews the artifact even with the flag off.' );
+		$this->assertInstanceOf( \WP_Post::class, $forced, '?artifact_preview=1 previews the artifact even with the flag off.' );
 	}
 
 	/**

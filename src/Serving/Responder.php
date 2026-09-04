@@ -119,7 +119,7 @@ final class Responder {
 	 * @param bool                                                   $immutable Whether the URL is revision pinned.
 	 * @return void
 	 */
-	public function send_asset( WP_Post $post, array $file, string $file_path, bool $immutable = true ): void {
+	public function send_asset( WP_Post $post, array $file, string $file_path, bool $immutable = false ): void {
 		$is_public = Statuses::is_public( $post );
 		$mime      = '' !== $file['mime'] ? $file['mime'] : 'application/octet-stream';
 		$modified  = (int) @filemtime( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
@@ -228,7 +228,13 @@ HTML;
 	 */
 	public function send_404( string $reason = 'not_found' ): void {
 		$this->begin( 'text/html; charset=utf-8' );
-		header( self::MARKER_HEADER . '-Reason: ' . $reason );
+
+		// Why a request missed distinguishes "no such artifact" from "hidden artifact",
+		// which is exactly what answering 404 instead of 403 conceals. Only people who
+		// can already see the artifacts get told.
+		if ( current_user_can( 'edit_artifacts' ) ) {
+			header( self::MARKER_HEADER . '-Reason: ' . $reason );
+		}
 		header( 'X-Robots-Tag: noindex, nofollow' );
 		nocache_headers();
 		status_header( 404 );

@@ -298,6 +298,21 @@ final class ArtifactRepository {
 			$parent_id = (int) $args['parent_id'];
 			if ( $parent_id > 0 ) {
 				$parent = get_post( $parent_id );
+
+				// Attaching to a post decides whose URL can serve these bytes, so it
+				// takes the same permission as editing that post.
+				if ( $parent instanceof WP_Post && ! current_user_can( 'edit_post', $parent_id ) ) {
+					return new WP_Error(
+						'artifact_forbidden',
+						sprintf(
+							/* translators: %d: post ID. */
+							__( 'You cannot attach an artifact to post %d, because you cannot edit it.', 'wp-artifacts' ),
+							$parent_id
+						),
+						array( 'status' => 403 )
+					);
+				}
+
 				if ( ! $parent instanceof WP_Post || ! in_array( $parent->post_type, ArtifactPostType::parent_post_types(), true ) ) {
 					return new WP_Error(
 						'artifact_not_found',

@@ -148,7 +148,8 @@ default.
 - Artifacts are `noindex` by default. Pass `indexable: true` when the page is meant to be found.
 - An artifact can stand in for an existing post or page: pass `parent_id` and
   `deliver_for_parent: true`, and the parent's URL serves the artifact while keeping its own
-  canonical URL and indexing rules. Add `?artifact=0` to any such URL to see the original.
+  canonical URL and indexing rules. Add `?artifact_preview=0` to any such URL to see the
+  original.
 - `wrap: true` serves the artifact inside the site header and footer. It is best effort and it is
   the only mode that touches your bytes.
 MD;

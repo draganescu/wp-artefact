@@ -66,7 +66,9 @@ test( 'bundle assets are served from the manifest and nothing else', async ( { r
 	expect( style.status() ).toBe( 200 );
 	expect( await style.text() ).toBe( css );
 	expect( style.headers()[ 'content-type' ] ).toContain( 'text/css' );
-	expect( style.headers()[ 'cache-control' ] ).toContain( 'immutable' );
+	// A plain asset URL names bytes that can change, so it must be revalidated.
+	expect( style.headers()[ 'cache-control' ] ).toContain( 'must-revalidate' );
+	expect( style.headers()[ 'cache-control' ] ).not.toContain( 'immutable' );
 
 	const image = await request.get( `${ base }img/x.png` );
 	expect( image.status() ).toBe( 200 );
@@ -108,6 +110,9 @@ test( 'revision-pinned asset URLs keep serving the bytes of that revision', asyn
 	const pinned = await request.get( `${ base }~r${ firstRevision }/a.css` );
 	expect( pinned.status() ).toBe( 200 );
 	expect( await pinned.text() ).toBe( 'a{color:red}' );
+
+	// Only a revision-pinned URL is genuinely immutable.
+	expect( pinned.headers()[ 'cache-control' ] ).toContain( 'immutable' );
 } );
 
 test( 'rolling back restores the content and the assets together', async ( { request } ) => {
@@ -209,6 +214,7 @@ test( 'a deleted artifact answers 410, or 301 when a target was given', async ( 
 
 	expect( ( await request.get( gonePath, { maxRedirects: 0 } ) ).status() ).toBe( 410 );
 
+	// An on-site target is honoured.
 	const moved = await publish( request, {
 		title: 'Moved',
 		slug: 'moved',
@@ -219,12 +225,30 @@ test( 'a deleted artifact answers 410, or 301 when a target was given', async ( 
 	await ability( request, 'wp-artifacts/delete', {
 		id: moved.id,
 		force: true,
-		redirect_to: 'https://example.com/elsewhere/',
+		redirect_to: '/somewhere-else/',
 	} );
 
 	const response = await request.get( movedPath, { maxRedirects: 0 } );
 	expect( response.status() ).toBe( 301 );
-	expect( response.headers().location ).toBe( 'https://example.com/elsewhere/' );
+	expect( response.headers().location ).toContain( '/somewhere-else/' );
+
+	// An off-site one is not: redirect_to comes from whoever could delete the
+	// artifact, which includes contributors deleting their own.
+	const offsite = await publish( request, {
+		title: 'Offsite',
+		slug: 'offsite',
+		status: 'publish',
+		content: DOC,
+	} );
+	const offsitePath = pathOf( offsite.url );
+	await ability( request, 'wp-artifacts/delete', {
+		id: offsite.id,
+		force: true,
+		redirect_to: 'https://evil.example/phish',
+	} );
+
+	const refused = await request.get( offsitePath, { maxRedirects: 0 } );
+	expect( refused.headers().location ).not.toContain( 'evil.example' );
 } );
 
 test( 'an unknown artifact URL is answered by the router, not the theme', async ( { request } ) => {

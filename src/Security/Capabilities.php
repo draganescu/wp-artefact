@@ -179,9 +179,58 @@ final class Capabilities {
 	}
 
 	/**
+	 * Tags that can execute, navigate or load code no matter what they contain.
+	 *
+	 * @var array<int,string>
+	 */
+	private const EXECUTABLE_TAGS = array(
+		'SCRIPT',
+		'IFRAME',
+		'FRAME',
+		'FRAMESET',
+		'OBJECT',
+		'EMBED',
+		'APPLET',
+		'BASE',
+		'PORTAL',
+	);
+
+	/**
+	 * Attributes whose value is a URL the browser will follow.
+	 *
+	 * @var array<int,string>
+	 */
+	private const URL_ATTRIBUTES = array(
+		'href',
+		'src',
+		'srcdoc',
+		'action',
+		'formaction',
+		'data',
+		'poster',
+		'background',
+		'xlink:href',
+		'ping',
+	);
+
+	/**
+	 * URL schemes an artifact may point at.
+	 *
+	 * @var array<int,string>
+	 */
+	private const SAFE_SCHEMES = array( 'http', 'https', 'mailto', 'tel', 'ftp', 'sms' );
+
+	/**
 	 * Conservative detection of executable content.
 	 *
-	 * False positives are acceptable, false negatives are not.
+	 * False positives are acceptable, false negatives are not — this is the gate that
+	 * decides whether storing a document needs `unfiltered_html`.
+	 *
+	 * It reads the document with the same HTML5 tokenizer the browser uses, via core's
+	 * WP_HTML_Tag_Processor, rather than pattern-matching the raw bytes. A regex over
+	 * bytes cannot see what a parser sees: `<svg/onload=…>` and `<img src="x"onerror=…>`
+	 * both start an attribute without any preceding whitespace, and an entity-encoded
+	 * `&#106;avascript:` is a scheme only after the parser decodes it.
 	 *
 	 * @param string $content Entry document.
 	 * @return string|null The reason executable content was detected, or null.
@@ -191,29 +240,97 @@ final class Capabilities {
 			return null;
 		}
 
-		$haystack = strtolower( $content );
-
-		if ( false !== strpos( $haystack, '<script' ) ) {
-			return __( 'a <script> tag', 'wp-artifacts' );
+		if ( ! class_exists( '\WP_HTML_Tag_Processor' ) ) {
+			// Fail closed: without a parser there is no way to be sure.
+			return __( 'content that cannot be inspected on this version of WordPress', 'wp-artifacts' );
 		}
 
-		if ( preg_match( '/\son[a-z]+\s*=/i', $content ) ) {
-			return __( 'an inline event handler attribute', 'wp-artifacts' );
-		}
+		$processor = new \WP_HTML_Tag_Processor( $content );
 
-		if ( preg_match( '/(?:href|src|action|formaction|data|xlink:href)\s*=\s*["\']?\s*javascript:/i', $content ) ) {
-			return __( 'a javascript: URL', 'wp-artifacts' );
-		}
+		while ( $processor->next_tag() ) {
+			$tag = (string) $processor->get_tag();
 
-		if ( false !== strpos( $haystack, '<iframe' ) && preg_match( '/srcdoc\s*=/i', $content ) ) {
-			return __( 'an iframe srcdoc document', 'wp-artifacts' );
-		}
+			if ( in_array( $tag, self::EXECUTABLE_TAGS, true ) ) {
+				return sprintf(
+					/* translators: %s: an HTML tag name, lowercase. */
+					__( 'a <%s> tag', 'wp-artifacts' ),
+					strtolower( $tag )
+				);
+			}
 
-		if ( preg_match( '/<(?:embed|object)\b/i', $content ) ) {
-			return __( 'an <embed> or <object> tag', 'wp-artifacts' );
+			$handlers = $processor->get_attribute_names_with_prefix( 'on' );
+			if ( ! empty( $handlers ) ) {
+				return sprintf(
+					/* translators: %s: an HTML attribute name. */
+					__( 'the inline event handler "%s"', 'wp-artifacts' ),
+					(string) $handlers[0]
+				);
+			}
+
+			if ( 'META' === $tag ) {
+				$equiv = $processor->get_attribute( 'http-equiv' );
+				if ( is_string( $equiv ) && 'refresh' === strtolower( trim( $equiv ) ) ) {
+					return __( 'a <meta http-equiv="refresh"> redirect', 'wp-artifacts' );
+				}
+			}
+
+			foreach ( self::URL_ATTRIBUTES as $attribute ) {
+				$value = $processor->get_attribute( $attribute );
+
+				if ( ! is_string( $value ) ) {
+					continue;
+				}
+
+				if ( 'srcdoc' === $attribute ) {
+					return __( 'an inline srcdoc document', 'wp-artifacts' );
+				}
+
+				if ( self::is_dangerous_url( $value ) ) {
+					return sprintf(
+						/* translators: %s: an HTML attribute name. */
+						__( 'a script-bearing URL in "%s"', 'wp-artifacts' ),
+						$attribute
+					);
+				}
+			}
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether a URL a browser would follow can carry code.
+	 *
+	 * @param string $url Attribute value, still HTML-encoded.
+	 * @return bool
+	 */
+	private static function is_dangerous_url( string $url ): bool {
+		// The parser hands back the decoded value, but decode again so a
+		// double-encoded scheme cannot slip past, and drop the characters browsers
+		// ignore while looking for the colon.
+		$candidate = html_entity_decode( $url, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$candidate = html_entity_decode( $candidate, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$candidate = preg_replace( '/[\x00-\x20\x7f]+/', '', $candidate ) ?? '';
+		$candidate = ltrim( $candidate );
+
+		if ( ! preg_match( '#^([a-z][a-z0-9+.\-]*):#i', $candidate, $matches ) ) {
+			// Relative, protocol-relative or fragment: no scheme, nothing to execute.
+			return false;
+		}
+
+		$scheme = strtolower( $matches[1] );
+
+		if ( in_array( $scheme, self::SAFE_SCHEMES, true ) ) {
+			return false;
+		}
+
+		if ( 'data' === $scheme ) {
+			// Inline images are how a self-contained artifact ships its assets, but SVG
+			// is a document that can carry script.
+			return ! preg_match( '#^data:image/(?!svg)#i', $candidate );
+		}
+
+		return true;
 	}
 
 	/**

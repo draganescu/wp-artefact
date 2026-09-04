@@ -69,8 +69,8 @@ function toQuery( payload, prefix = 'input' ) {
 	return new URLSearchParams( pairs ).toString();
 }
 
-async function ability( request, name, input = {} ) {
-	const nonce = await login( request );
+// Core picks the verb from the ability's annotations, so every caller has to.
+async function callAbility( context, nonce, name, input = {} ) {
 	const slug = name.split( '/' )[ 1 ];
 	const route = `/wp-json/wp-abilities/v1/abilities/${ name }/run`;
 	const headers = { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' };
@@ -80,13 +80,19 @@ async function ability( request, name, input = {} ) {
 		const query = toQuery( input );
 		const url = query ? `${ route }?${ query }` : route;
 		response = READ_ONLY.has( slug )
-			? await request.get( url, { headers } )
-			: await request.delete( url, { headers } );
+			? await context.get( url, { headers } )
+			: await context.delete( url, { headers } );
 	} else {
-		response = await request.post( route, { headers, data: { input } } );
+		response = await context.post( route, { headers, data: { input } } );
 	}
 
 	return response.json();
+}
+
+async function ability( request, name, input = {} ) {
+	const nonce = await login( request );
+
+	return callAbility( request, nonce, name, input );
 }
 
 async function rest( request, method, path, data ) {
@@ -126,4 +132,4 @@ async function cleanup( request ) {
 const b64 = ( value ) => Buffer.from( value ).toString( 'base64' );
 const pathOf = ( url ) => new URL( url ).pathname;
 
-module.exports = { login, ability, rest, publish, update, cleanup, b64, pathOf, ADMIN, LOW_PRIV };
+module.exports = { login, ability, callAbility, rest, publish, update, cleanup, b64, pathOf, ADMIN, LOW_PRIV };

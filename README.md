@@ -149,6 +149,11 @@ sniffed, and `X-Robots-Tag: noindex, nofollow` unless the artifact is marked ind
 default (`strict` sends `default-src 'self' 'unsafe-inline' data: blob:; frame-ancestors 'self'`).
 Nothing sets a cookie. Non-public artifacts get `nocache_headers()` instead of cache headers.
 
+Only **revision-pinned** asset URLs (`/a/{slug}/~r{id}/…`) are sent
+`Cache-Control: public, max-age=31536000, immutable`. A plain asset URL names bytes that
+can change, so it is revalidated — otherwise unpublishing an artifact would leave a year
+of its assets sitting in shared caches.
+
 ## Web server notes
 
 Bundle assets live in `wp-content/uploads/artifacts/{post_id}-{random}/{revision_id}/`.
@@ -267,6 +272,17 @@ what the shipped APIs actually require:
   `show_on_front` and `page_on_front`, which are site-wide settings; letting anyone who
   can publish an artifact take over `/` is a bigger grant than the rest of the tool set.
   It also records the previous setting, so `restore: true` puts it back.
+- **Only revision-pinned asset URLs are `immutable`.** Acceptance criterion 3 asks for the
+  immutable header on the plain asset path too. Sent there it would mean that unpublishing
+  an artifact cannot withdraw its assets from any cache that already holds them, for a
+  year, so the plain path is revalidated instead.
+- **The parent-delivery toggle is `?artifact_preview=`, not `?artifact=`.** `artifact` is
+  the post type's own public query var, so `?artifact=1` was read as a request for the
+  artifact with slug "1" and answered 404. The spec's name could never have worked.
+- **`redirect_to` on a deleted artifact must stay on this site.** It is set by whoever
+  could delete the artifact, which includes a contributor deleting their own, so an
+  off-site value would be a stored open redirect on your domain. Add a host to
+  `allowed_redirect_hosts` if you need one.
 - **The manifest always lists its own entry document.** The spec rejects a manifest whose
   `files` omits the entry; since the plugin builds the manifest itself, it derives that
   record from `post_content` instead of refusing the call.

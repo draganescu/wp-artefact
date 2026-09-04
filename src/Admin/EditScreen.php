@@ -444,7 +444,7 @@ final class EditScreen {
 	 * @return array<int,WP_Post>
 	 */
 	private function parent_candidates(): array {
-		return get_posts(
+		$candidates = get_posts(
 			array(
 				'post_type'        => ArtifactPostType::parent_post_types(),
 				'post_status'      => array( 'publish', 'private', 'draft', 'pending' ),
@@ -452,6 +452,18 @@ final class EditScreen {
 				'orderby'          => 'modified',
 				'order'            => 'DESC',
 				'suppress_filters' => false,
+			)
+		);
+
+		// WP_Query with an explicit status list and no `perm` returns everyone's
+		// unpublished posts, so the titles are filtered down to what this user may
+		// actually attach an artifact to.
+		return array_values(
+			array_filter(
+				$candidates,
+				static function ( WP_Post $candidate ): bool {
+					return current_user_can( 'edit_post', $candidate->ID );
+				}
 			)
 		);
 	}
@@ -558,6 +570,16 @@ final class EditScreen {
 		$new_parent = (int) $_POST['wp_artifacts_parent'];
 		$old_parent = (int) $post->post_parent;
 
+		// Attaching to a post decides whose URL can serve these bytes. Check before
+		// writing anything, not after: the old order authorized only the meta write.
+		if ( $new_parent > 0 && ! current_user_can( 'edit_post', $new_parent ) ) {
+			return;
+		}
+
+		if ( $new_parent > 0 && ! in_array( get_post_type( $new_parent ), ArtifactPostType::parent_post_types(), true ) ) {
+			return;
+		}
+
 		if ( $new_parent !== $old_parent ) {
 			remove_action( 'save_post_' . ArtifactPostType::POST_TYPE, array( $this, 'save' ), 10 );
 			wp_update_post(
@@ -573,7 +595,7 @@ final class EditScreen {
 			}
 		}
 
-		if ( $new_parent <= 0 || ! current_user_can( 'edit_post', $new_parent ) ) {
+		if ( $new_parent <= 0 ) {
 			return;
 		}
 

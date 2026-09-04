@@ -32,7 +32,7 @@ test( 'an artifact can stand in for a page without changing its URL', async ( { 
 	// The parent owns the canonical URL and the indexing rules.
 	expect( delivered.headers()[ 'x-robots-tag' ] ).toBeUndefined();
 
-	const original = await request.get( `${ pagePath }?artifact=0` );
+	const original = await request.get( `${ pagePath }?artifact_preview=0` );
 	expect( await original.text() ).toContain( 'ORIGINAL PAGE BODY' );
 } );
 
